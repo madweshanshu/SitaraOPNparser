@@ -18,7 +18,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from parse_opn import (
+from parse_opn_engine import (
     parse_opn,
     load_features, load_speed_grades, load_orderable,
     BASE_PARTS, CORE_COUNT, EVOLUTION_STAGE, REVISION, PACKAGE,

@@ -19,7 +19,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Reuse naming convention logic from parse_opn.py
 sys.path.insert(0, SCRIPT_DIR)
-from parse_opn import (
+from parse_opn_engine import (
     parse_opn, HELP,
     BASE_PARTS, CORE_COUNT, EVOLUTION_STAGE, REVISION, PACKAGE,
     AM62X_SPEED_GRADE, AM62L_SPEED_GRADE, AM62A_SPEED_GRADE, AM62P_SPEED_GRADE,

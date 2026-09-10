@@ -116,21 +116,20 @@ sitara-opn-parser/
 ├── README.md
 ├── LOG.md
 │
-├── parse_opn.py              Core naming convention logic (shared by all scripts)
+├── parse_opn_engine.py       Core naming convention logic (shared, not run directly)
 ├── parse_opn_terminal.py     Terminal UI — reads master.csv
 ├── parse_opn_web.py          Interactive web UI — reads master.csv
 │
-├── build_master_csv.py       Rebuilds all CSVs in data/ from data/raw/
-│
-├── data/
-│   ├── master.csv                Single denormalized file (127 OPNs x 77 cols)
-│   ├── master_orderable.csv      All OPNs across all device lines (127 rows)
-│   ├── master_features.csv       One row per device variant (22 rows)
-│   ├── master_speed_grades.csv   Speed grades for all families (21 rows)
-│   └── raw/                      Bootstrap artifacts — only needed when re-extracting from PDFs
-│       ├── extract_tables.py     Extracts tables from the PDFs into this folder
-│       ├── am62*.pdf             Datasheet PDFs
-│       └── am62*_*.csv           Raw tables extracted from PDFs
+└── data/
+    ├── master.csv                Single denormalized file (127 OPNs x 77 cols)
+    ├── master_orderable.csv      All OPNs across all device lines (127 rows)
+    ├── master_features.csv       One row per device variant (22 rows)
+    ├── master_speed_grades.csv   Speed grades for all families (21 rows)
+    ├── build_master_csv.py       Rebuilds master CSVs from data/raw/ (run when adding a device)
+    └── raw/                      Only needed when adding a new device or re-extracting
+        ├── extract_tables.py     Extracts tables from PDFs into this folder
+        ├── am62*.pdf             Datasheet PDFs
+        └── am62*_*.csv           Raw tables extracted from PDFs
 │
 └── archive/                  Earlier multi-CSV scripts (superseded by master.csv)
     ├── parse_opn_html.py
@@ -142,26 +141,26 @@ sitara-opn-parser/
 ```
 data/raw/*.pdf  ->  data/raw/extract_tables.py  ->  data/raw/*.csv
                                                             |
-                                                    build_master_csv.py
-                                                  |
-                                           data/master.csv
-                                           data/master_*.csv
-                                                  |
-                                     parse_opn_terminal.py
-                                     parse_opn_web.py
+                                                  data/build_master_csv.py
+                                                            |
+                                                     data/master.csv
+                                                     data/master_*.csv
+                                                            |
+                                                 parse_opn_terminal.py
+                                                 parse_opn_web.py
 ```
 
-The `data/` CSVs are the single source of truth. PDFs and raw CSVs in `data/raw/` are only needed to regenerate them.
+The `data/` CSVs are the single source of truth. PDFs and raw CSVs in `data/raw/` are only needed when adding a new device.
 
 ## Adding a New Device Family
 
 1. Download the datasheet PDF into `data/raw/`.
 2. Add page ranges and an `extract_<family>()` function to `data/raw/extract_tables.py`.
 3. Run `python3 data/raw/extract_tables.py` to produce raw CSVs in `data/raw/`.
-4. Add device meta, feature mapping, and speed grade processing to `build_master_csv.py`.
-5. Run `python3 build_master_csv.py` to regenerate the master CSVs.
-6. Add base parts, speed grades, features, and package codes to `parse_opn.py`.
-7. Add the new speed grade display columns to `SPEED_DISPLAY_COLS` in `parse_opn.py`.
+4. Add device meta, feature mapping, and speed grade processing to `data/build_master_csv.py`.
+5. Run `python3 data/build_master_csv.py` to regenerate the master CSVs.
+6. Add base parts, speed grades, features, and package codes to `parse_opn_engine.py`.
+7. Add speed grade display columns to `SPEED_DISPLAY_COLS` in `parse_opn_engine.py`.
 
 ## Datasheet References
 

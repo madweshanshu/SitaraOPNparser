@@ -16,7 +16,7 @@ import html as html_escape_mod
 
 # Reuse all parsing/lookup logic from parse_opn.py
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from parse_opn import (
+from parse_opn_engine import (
     parse_opn, HELP,
     BASE_PARTS, CORE_COUNT, EVOLUTION_STAGE, REVISION, PACKAGE,
     AM62X_SPEED_GRADE, AM62L_SPEED_GRADE, AM62A_SPEED_GRADE, AM62P_SPEED_GRADE,

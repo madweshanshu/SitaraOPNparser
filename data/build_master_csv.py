@@ -14,9 +14,9 @@ import csv
 import re
 import os
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR   = os.path.join(SCRIPT_DIR, "data")
-RAW_DIR    = os.path.join(DATA_DIR, "raw")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))   # data/
+DATA_DIR   = SCRIPT_DIR
+RAW_DIR    = os.path.join(SCRIPT_DIR, "raw")
 
 
 def path(name):
@@ -812,8 +812,8 @@ def load_master_csv(name):
 
 def build_consolidated():
     import sys
-    sys.path.insert(0, SCRIPT_DIR)
-    from parse_opn import parse_opn as _parse_opn
+    sys.path.insert(0, os.path.dirname(SCRIPT_DIR))   # project root
+    from parse_opn_engine import parse_opn as _parse_opn
 
     orderable_rows   = load_master_csv("master_orderable.csv")
     features_by_base = {r["Base Part"]: r for r in load_master_csv("master_features.csv")}
