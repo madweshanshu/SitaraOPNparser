@@ -15,14 +15,22 @@ import re
 import os
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR   = os.path.join(SCRIPT_DIR, "data")
+RAW_DIR    = os.path.join(DATA_DIR, "raw")
 
 
 def path(name):
-    return os.path.join(SCRIPT_DIR, name)
+    """Path for master CSV files (data/)."""
+    return os.path.join(DATA_DIR, name)
+
+
+def raw_path(name):
+    """Path for raw extracted files (data/raw/)."""
+    return os.path.join(RAW_DIR, name)
 
 
 def load_csv(name):
-    with open(path(name), newline="", encoding="utf-8") as f:
+    with open(raw_path(name), newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
@@ -31,7 +39,7 @@ def write_csv(name, header, rows):
         writer = csv.DictWriter(f, fieldnames=header, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
-    print(f"Wrote {len(rows)} rows -> {name}")
+    print(f"Wrote {len(rows)} rows -> data/{name}")
 
 
 # ---------------------------------------------------------------------------
@@ -796,19 +804,25 @@ def build_features():
 # One row per OPN; features and speed grade data joined in.
 # ---------------------------------------------------------------------------
 
+def load_master_csv(name):
+    """Load a master CSV from data/ (not data/raw/)."""
+    with open(path(name), newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
 def build_consolidated():
     import sys
     sys.path.insert(0, SCRIPT_DIR)
     from parse_opn import parse_opn as _parse_opn
 
-    orderable_rows   = load_csv("master_orderable.csv")
-    features_by_base = {r["Base Part"]: r for r in load_csv("master_features.csv")}
+    orderable_rows   = load_master_csv("master_orderable.csv")
+    features_by_base = {r["Base Part"]: r for r in load_master_csv("master_features.csv")}
     speed_by_key     = {(r["Device Line"], r["Speed Grade"]): r
-                        for r in load_csv("master_speed_grades.csv")}
+                        for r in load_master_csv("master_speed_grades.csv")}
 
     # Column names from features and speed tables (skip keys already in orderable)
-    feat_sample  = load_csv("master_features.csv")[0]
-    speed_sample = load_csv("master_speed_grades.csv")[0]
+    feat_sample  = load_master_csv("master_features.csv")[0]
+    speed_sample = load_master_csv("master_speed_grades.csv")[0]
 
     feat_cols  = [c for c in feat_sample  if c not in ("Device Line", "Base Part")]
     speed_cols = [c for c in speed_sample if c not in ("Device Line", "Speed Grade")]

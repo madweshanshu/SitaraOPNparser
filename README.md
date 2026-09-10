@@ -124,35 +124,42 @@ Same 5-field structure. Revisions A/B/C. Speed grades O/S/T/U/V. Features: G=Bas
 
 ```
 sitara-opn-parser/
-├── parse_opn.py            Terminal parser (main script)
-├── parse_opn_html.py       Static HTML output
-├── parse_opn_web.py        Interactive web UI
+├── README.md
+├── LOG.md
 │
-├── master_orderable.csv    All OPNs (source of truth, 127 rows)
-├── master_features.csv     One row per device variant (22 rows)
-├── master_speed_grades.csv Speed grades for all families (21 rows)
+├── parse_opn.py            Core parser logic + terminal UI
+├── parse_opn_html.py       Static HTML output (writes output.html)
+├── parse_opn_web.py        Interactive web UI (3-CSV backend)
+├── parse_opn_v2.py         Terminal UI backed by single master.csv
+├── parse_opn_v2_web.py     Interactive web UI backed by single master.csv
 │
-├── build_master_csv.py     Rebuilds master CSVs from raw extracted CSVs
-├── extract_tables.py       Extracts raw tables from datasheet PDFs (bootstrap)
+├── build_master_csv.py     Rebuilds all CSVs in data/ from data/raw/
+├── extract_tables.py       Extracts raw tables from PDFs into data/raw/
 │
-├── am62*.pdf               Datasheet PDFs (bootstrap only)
-├── am62*_*.csv             Raw extracted tables (bootstrap only)
-└── LOG.md                  Development log
+└── data/
+    ├── master.csv              Single denormalized file (127 OPNs × 77 cols)
+    ├── master_orderable.csv    All OPNs across all device lines
+    ├── master_features.csv     One row per device variant (22 rows)
+    ├── master_speed_grades.csv Speed grades for all families (21 rows)
+    └── raw/                    Bootstrap artifacts — not needed at runtime
+        ├── am62*.pdf           Datasheet PDFs
+        └── am62*_*.csv         Raw tables extracted from PDFs
 ```
-
-The three `master_*.csv` files are the single source of truth. The PDFs and raw CSVs are only needed to regenerate them.
 
 ## Data Architecture
 
 ```
-PDFs  →  extract_tables.py  →  raw CSVs  →  build_master_csv.py  →  master_*.csv
-                                                                           ↓
-                                                                    parse_opn.py
-                                                                    parse_opn_html.py
-                                                                    parse_opn_web.py
+data/raw/*.pdf  →  extract_tables.py  →  data/raw/*.csv
+                                               ↓
+                                       build_master_csv.py
+                                               ↓
+                              ┌────────────────┼─────────────────┐
+                         data/master.csv   data/master_*.csv  (all four files)
+                              ↓                    ↓
+                    parse_opn_v2*.py        parse_opn*.py (v1)
 ```
 
-The parsers load the three master CSVs at startup. No PDF access at runtime.
+The `data/` CSVs are the single source of truth. PDFs and raw CSVs in `data/raw/` are only needed to regenerate them.
 
 ## Adding a New Device Family
 

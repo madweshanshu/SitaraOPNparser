@@ -28,7 +28,7 @@ from parse_opn import (
     decode_am62l_security_fs,
 )
 
-MASTER_CSV = os.path.join(SCRIPT_DIR, "master.csv")
+MASTER_CSV = os.path.join(SCRIPT_DIR, "data", "master.csv")
 
 # Columns from master.csv that belong to each section
 ORDERABLE_COLS = [

@@ -24,6 +24,7 @@ import sys
 import os
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR   = os.path.join(SCRIPT_DIR, "data")
 
 # ---------------------------------------------------------------------------
 # Lookup tables
@@ -181,7 +182,7 @@ CORE_COUNT = {1: "Single-core", 2: "Dual-core", 4: "Quad-core"}
 # ---------------------------------------------------------------------------
 
 def load_csv(filename):
-    path = os.path.join(SCRIPT_DIR, filename)
+    path = os.path.join(DATA_DIR, filename)
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         return list(reader)

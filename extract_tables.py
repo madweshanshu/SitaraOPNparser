@@ -9,29 +9,37 @@ AM62L (am62l_datasheet.pdf / SPRSPA1B):
 """
 
 import csv
+import os
 import re
 import pdfplumber
 
+RAW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "raw")
+
+
+def raw(name):
+    return os.path.join(RAW_DIR, name)
+
+
 # ---- AM62x config ----
-AM62X_PDF          = "am625_datasheet.pdf"
+AM62X_PDF          = raw("am625_datasheet.pdf")
 AM62X_ORD_PAGES    = range(256, 264)
 AM62X_COMP_PAGES   = [7, 8]
 AM62X_SPEED_PAGE   = 93
 
 # ---- AM62L config ----
-AM62L_PDF          = "am62l_datasheet.pdf"
+AM62L_PDF          = raw("am62l_datasheet.pdf")
 AM62L_ORD_PAGES    = [220]
 AM62L_COMP_PAGES   = [6, 7]
 AM62L_SPEED_PAGE   = 70
 
 # ---- AM62A config ----
-AM62A_PDF          = "am62a_datasheet.pdf"
+AM62A_PDF          = raw("am62a_datasheet.pdf")
 AM62A_ORD_PAGES    = range(238, 241)
 AM62A_COMP_PAGES   = [7, 8]
 AM62A_SPEED_PAGE   = 84
 
 # ---- AM62P config ----
-AM62P_PDF          = "am62p_datasheet.pdf"
+AM62P_PDF          = raw("am62p_datasheet.pdf")
 AM62P_ORD_PAGES    = [233]
 AM62P_COMP_PAGES   = [7, 8]
 AM62P_SPEED_PAGE   = 84
@@ -139,44 +147,44 @@ def extract_am62x():
     with pdfplumber.open(AM62X_PDF) as pdf:
         print(f"\n[AM62x] {len(pdf.pages)} pages")
         h, r = extract_orderable(pdf, AM62X_ORD_PAGES)
-        write_csv("orderable_info.csv", h, r)
+        write_csv(raw("orderable_info.csv"), h, r)
         h, r = extract_device_comparison(pdf, AM62X_COMP_PAGES, min_cols=10)
-        write_csv("device_comparison.csv", h, r)
+        write_csv(raw("device_comparison.csv"), h, r)
         h, r = extract_speed_grades(pdf, AM62X_SPEED_PAGE)
-        write_csv("speed_grades.csv", h, r)
+        write_csv(raw("speed_grades.csv"), h, r)
 
 
 def extract_am62l():
     with pdfplumber.open(AM62L_PDF) as pdf:
         print(f"\n[AM62L] {len(pdf.pages)} pages")
         h, r = extract_orderable(pdf, AM62L_ORD_PAGES, opn_prefix="AM62L")
-        write_csv("am62l_orderable_info.csv", h, r)
+        write_csv(raw("am62l_orderable_info.csv"), h, r)
         h, r = extract_device_comparison(pdf, AM62L_COMP_PAGES, min_cols=4)
-        write_csv("am62l_device_comparison.csv", h, r)
+        write_csv(raw("am62l_device_comparison.csv"), h, r)
         h, r = extract_speed_grades(pdf, AM62L_SPEED_PAGE)
-        write_csv("am62l_speed_grades.csv", h, r)
+        write_csv(raw("am62l_speed_grades.csv"), h, r)
 
 
 def extract_am62a():
     with pdfplumber.open(AM62A_PDF) as pdf:
         print(f"\n[AM62A] {len(pdf.pages)} pages")
         h, r = extract_orderable(pdf, AM62A_ORD_PAGES, opn_prefix="AM62A")
-        write_csv("am62a_orderable_info.csv", h, r)
+        write_csv(raw("am62a_orderable_info.csv"), h, r)
         h, r = extract_device_comparison(pdf, AM62A_COMP_PAGES, min_cols=9)
-        write_csv("am62a_device_comparison.csv", h, r)
+        write_csv(raw("am62a_device_comparison.csv"), h, r)
         h, r = extract_speed_grades(pdf, AM62A_SPEED_PAGE)
-        write_csv("am62a_speed_grades.csv", h, r)
+        write_csv(raw("am62a_speed_grades.csv"), h, r)
 
 
 def extract_am62p():
     with pdfplumber.open(AM62P_PDF) as pdf:
         print(f"\n[AM62P] {len(pdf.pages)} pages")
         h, r = extract_orderable(pdf, AM62P_ORD_PAGES, opn_prefix="AM62P")
-        write_csv("am62p_orderable_info.csv", h, r)
+        write_csv(raw("am62p_orderable_info.csv"), h, r)
         h, r = extract_device_comparison(pdf, AM62P_COMP_PAGES, min_cols=6)
-        write_csv("am62p_device_comparison.csv", h, r)
+        write_csv(raw("am62p_device_comparison.csv"), h, r)
         h, r = extract_speed_grades(pdf, AM62P_SPEED_PAGE)
-        write_csv("am62p_speed_grades.csv", h, r)
+        write_csv(raw("am62p_speed_grades.csv"), h, r)
 
 
 def main():
