@@ -121,14 +121,14 @@ sitara-opn-parser/
 ├── parse_opn_web.py          Interactive web UI — reads master.csv
 │
 ├── build_master_csv.py       Rebuilds all CSVs in data/ from data/raw/
-├── extract_tables.py         Extracts raw tables from PDFs into data/raw/
 │
 ├── data/
 │   ├── master.csv                Single denormalized file (127 OPNs x 77 cols)
 │   ├── master_orderable.csv      All OPNs across all device lines (127 rows)
 │   ├── master_features.csv       One row per device variant (22 rows)
 │   ├── master_speed_grades.csv   Speed grades for all families (21 rows)
-│   └── raw/                      Bootstrap artifacts — not needed at runtime
+│   └── raw/                      Bootstrap artifacts — only needed when re-extracting from PDFs
+│       ├── extract_tables.py     Extracts tables from the PDFs into this folder
 │       ├── am62*.pdf             Datasheet PDFs
 │       └── am62*_*.csv           Raw tables extracted from PDFs
 │
@@ -140,9 +140,9 @@ sitara-opn-parser/
 ## Data Architecture
 
 ```
-data/raw/*.pdf  ->  extract_tables.py  ->  data/raw/*.csv
-                                                  |
-                                          build_master_csv.py
+data/raw/*.pdf  ->  data/raw/extract_tables.py  ->  data/raw/*.csv
+                                                            |
+                                                    build_master_csv.py
                                                   |
                                            data/master.csv
                                            data/master_*.csv
@@ -155,9 +155,9 @@ The `data/` CSVs are the single source of truth. PDFs and raw CSVs in `data/raw/
 
 ## Adding a New Device Family
 
-1. Download the datasheet PDF to the project directory.
-2. Add page ranges and an `extract_<family>()` function to `extract_tables.py`.
-3. Run `python3 extract_tables.py` to produce raw CSVs.
+1. Download the datasheet PDF into `data/raw/`.
+2. Add page ranges and an `extract_<family>()` function to `data/raw/extract_tables.py`.
+3. Run `python3 data/raw/extract_tables.py` to produce raw CSVs in `data/raw/`.
 4. Add device meta, feature mapping, and speed grade processing to `build_master_csv.py`.
 5. Run `python3 build_master_csv.py` to regenerate the master CSVs.
 6. Add base parts, speed grades, features, and package codes to `parse_opn.py`.
