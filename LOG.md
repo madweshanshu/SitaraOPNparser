@@ -232,7 +232,9 @@ Format: `[a] BBBBBBB r Z f Y t PPP [Q1]` (same 5-field structure as AM62L/AM62A)
 | `speed_grades.csv` | Speed grade frequency table (5 rows) |
 | `parse_opn.py` | Terminal output: `python3 parse_opn.py <OPN>` |
 | `parse_opn_html.py` | Static HTML: generates `output.html` and opens in browser |
-| `parse_opn_web.py` | Interactive web UI: starts local server, user types OPN in browser |
+| `parse_opn_web.py` | Interactive web UI (three-CSV backend) |
+| `parse_opn_v2.py` | Terminal output backed by single `master.csv` |
+| `parse_opn_v2_web.py` | Interactive web UI backed by single `master.csv` |
 | `build_master_csv.py` | One-time consolidation script: raw CSVs -> master CSVs |
 | `master_orderable.csv` | **[source of truth]** All OPNs (127 rows) |
 | `master_features.csv` | **[source of truth]** One row per device variant (22 rows) |

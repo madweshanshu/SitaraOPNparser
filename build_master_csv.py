@@ -792,11 +792,60 @@ def build_features():
 
 
 # ---------------------------------------------------------------------------
+# master.csv - single denormalized file
+# One row per OPN; features and speed grade data joined in.
+# ---------------------------------------------------------------------------
+
+def build_consolidated():
+    import sys
+    sys.path.insert(0, SCRIPT_DIR)
+    from parse_opn import parse_opn as _parse_opn
+
+    orderable_rows   = load_csv("master_orderable.csv")
+    features_by_base = {r["Base Part"]: r for r in load_csv("master_features.csv")}
+    speed_by_key     = {(r["Device Line"], r["Speed Grade"]): r
+                        for r in load_csv("master_speed_grades.csv")}
+
+    # Column names from features and speed tables (skip keys already in orderable)
+    feat_sample  = load_csv("master_features.csv")[0]
+    speed_sample = load_csv("master_speed_grades.csv")[0]
+
+    feat_cols  = [c for c in feat_sample  if c not in ("Device Line", "Base Part")]
+    speed_cols = [c for c in speed_sample if c not in ("Device Line", "Speed Grade")]
+
+    header = list(orderable_rows[0].keys()) + ["Speed Grade"] + feat_cols + speed_cols
+
+    rows = []
+    for ord_row in orderable_rows:
+        opn = ord_row["Orderable Part Number"]
+        parsed, _   = _parse_opn(opn)
+        speed_grade = parsed["speed_grade"] if parsed else ""
+        base        = ord_row["Base Part"]
+        dl          = ord_row["Device Line"]
+
+        row = dict(ord_row)
+        row["Speed Grade"] = speed_grade
+
+        feat = features_by_base.get(base, {})
+        for c in feat_cols:
+            row[c] = feat.get(c, "")
+
+        sg_data = speed_by_key.get((dl, speed_grade), {})
+        for c in speed_cols:
+            row[c] = sg_data.get(c, "")
+
+        rows.append(row)
+
+    write_csv("master.csv", header, rows)
+
+
+# ---------------------------------------------------------------------------
 
 def main():
     build_orderable()
     build_speed_grades()
     build_features()
+    build_consolidated()
     print("\nDone. parse_opn.py now only needs the master_*.csv files.")
 
 
