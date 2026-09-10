@@ -18,10 +18,7 @@ Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display
 
 ```bash
 # Terminal output
-python3 parse_opn.py AM62P54CVMHIAMHR
-
-# Generate a styled HTML file (opens in browser)
-python3 parse_opn_html.py AM62P54CVMHIAMHR
+python3 parse_opn_terminal.py AM62P54CVMHIAMHR
 
 # Interactive web UI (type OPNs directly in the browser)
 python3 parse_opn_web.py
@@ -37,12 +34,12 @@ The three parser scripts (`parse_opn.py`, `parse_opn_html.py`, `parse_opn_web.py
 
 ## Usage
 
-### 1. Terminal (`parse_opn.py`)
+### Terminal (`parse_opn_terminal.py`)
 
 ```
-python3 parse_opn.py <OPN>        decode a specific part number
-python3 parse_opn.py              interactive prompt
-python3 parse_opn.py -h           show help and field format reference
+python3 parse_opn_terminal.py <OPN>    decode a specific part number
+python3 parse_opn_terminal.py          interactive prompt
+python3 parse_opn_terminal.py -h       show help and field format reference
 ```
 
 Output sections:
@@ -51,15 +48,7 @@ Output sections:
 - **Speed Grade** — max frequencies per subsystem, split by VDD_CORE voltage
 - **Orderable Info** — status, MSL rating, part marking from the datasheet
 
-### 2. Static HTML (`parse_opn_html.py`)
-
-```
-python3 parse_opn_html.py <OPN>
-```
-
-Writes `output.html` to the project directory and opens it in the default browser.
-
-### 3. Interactive Web UI (`parse_opn_web.py`)
+### Interactive Web UI (`parse_opn_web.py`)
 
 ```
 python3 parse_opn_web.py          starts on http://localhost:8080
@@ -127,36 +116,39 @@ sitara-opn-parser/
 ├── README.md
 ├── LOG.md
 │
-├── parse_opn.py            Core parser logic + terminal UI
-├── parse_opn_html.py       Static HTML output (writes output.html)
-├── parse_opn_web.py        Interactive web UI (3-CSV backend)
-├── parse_opn_v2.py         Terminal UI backed by single master.csv
-├── parse_opn_v2_web.py     Interactive web UI backed by single master.csv
+├── parse_opn.py              Core naming convention logic (shared by all scripts)
+├── parse_opn_terminal.py     Terminal UI — reads master.csv
+├── parse_opn_web.py          Interactive web UI — reads master.csv
 │
-├── build_master_csv.py     Rebuilds all CSVs in data/ from data/raw/
-├── extract_tables.py       Extracts raw tables from PDFs into data/raw/
+├── build_master_csv.py       Rebuilds all CSVs in data/ from data/raw/
+├── extract_tables.py         Extracts raw tables from PDFs into data/raw/
 │
-└── data/
-    ├── master.csv              Single denormalized file (127 OPNs × 77 cols)
-    ├── master_orderable.csv    All OPNs across all device lines
-    ├── master_features.csv     One row per device variant (22 rows)
-    ├── master_speed_grades.csv Speed grades for all families (21 rows)
-    └── raw/                    Bootstrap artifacts — not needed at runtime
-        ├── am62*.pdf           Datasheet PDFs
-        └── am62*_*.csv         Raw tables extracted from PDFs
+├── data/
+│   ├── master.csv                Single denormalized file (127 OPNs x 77 cols)
+│   ├── master_orderable.csv      All OPNs across all device lines (127 rows)
+│   ├── master_features.csv       One row per device variant (22 rows)
+│   ├── master_speed_grades.csv   Speed grades for all families (21 rows)
+│   └── raw/                      Bootstrap artifacts — not needed at runtime
+│       ├── am62*.pdf             Datasheet PDFs
+│       └── am62*_*.csv           Raw tables extracted from PDFs
+│
+└── archive/                  Earlier multi-CSV scripts (superseded by master.csv)
+    ├── parse_opn_html.py
+    └── parse_opn_web.py
 ```
 
 ## Data Architecture
 
 ```
-data/raw/*.pdf  →  extract_tables.py  →  data/raw/*.csv
-                                               ↓
-                                       build_master_csv.py
-                                               ↓
-                              ┌────────────────┼─────────────────┐
-                         data/master.csv   data/master_*.csv  (all four files)
-                              ↓                    ↓
-                    parse_opn_v2*.py        parse_opn*.py (v1)
+data/raw/*.pdf  ->  extract_tables.py  ->  data/raw/*.csv
+                                                  |
+                                          build_master_csv.py
+                                                  |
+                                           data/master.csv
+                                           data/master_*.csv
+                                                  |
+                                     parse_opn_terminal.py
+                                     parse_opn_web.py
 ```
 
 The `data/` CSVs are the single source of truth. PDFs and raw CSVs in `data/raw/` are only needed to regenerate them.

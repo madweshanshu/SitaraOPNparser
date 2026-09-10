@@ -1,14 +1,14 @@
 """
-AM62x / AM62L / AM62A / AM62P OPN parser - single master.csv version.
+AM62x / AM62L / AM62A / AM62P OPN parser - terminal UI backed by master.csv.
 
 Reads only master.csv (one row per OPN, all data pre-joined).
 For OPNs not in the orderable table the naming convention is still
 decoded and features/speed data are looked up by base part and speed grade.
 
 Usage:
-    python3 parse_opn_v2.py <OPN>
-    python3 parse_opn_v2.py          (interactive prompt)
-    python3 parse_opn_v2.py -h
+    python3 parse_opn_terminal.py <OPN>
+    python3 parse_opn_terminal.py          (interactive prompt)
+    python3 parse_opn_terminal.py -h
 """
 
 import csv
@@ -230,7 +230,7 @@ def main():
             sys.exit(0)
         raw_opn = sys.argv[1]
     else:
-        print("AM62x OPN Parser v2 (master.csv)  |  run with -h for help")
+        print("AM62x OPN Parser  |  run with -h for help")
         raw_opn = input("Enter OPN: ").strip()
 
     parsed, err = parse_opn(raw_opn)
