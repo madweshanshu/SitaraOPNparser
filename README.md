@@ -1,7 +1,9 @@
 # Sitara OPN Parser
 
+**Live App**: https://madweshanshu.github.io/SitaraOPNparser/  
 **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser  
-**Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
+**Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse  
+**GitHub**: https://github.com/madweshanshu/SitaraOPNparser
 
 Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display the device's capabilities, speed grades, and orderable information sourced directly from TI datasheets.
 
