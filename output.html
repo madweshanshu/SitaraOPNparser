@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPN: AM62A74AVMHIANFR</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a1a;
+    padding: 24px;
+    font-size: 14px;
+}
+.container { max-width: 960px; margin: 0 auto; }
+header {
+    background: #c41230;
+    color: white;
+    padding: 18px 24px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+header h1 { font-size: 20px; font-weight: 600; }
+header .opn { font-size: 14px; opacity: 0.85; font-family: monospace; }
+.body { background: white; border-radius: 0 0 8px 8px; padding: 24px; }
+.section { margin-bottom: 28px; }
+.section h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #c41230;
+    border-bottom: 2px solid #c41230;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+}
+table { width: 100%; border-collapse: collapse; }
+td, th {
+    padding: 7px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+td:first-child { color: #555; width: 220px; font-weight: 500; white-space: nowrap; }
+tr:nth-child(even) { background: #fafafa; }
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-yes  { background: #e6f4ea; color: #1e7e34; }
+.badge-no   { background: #fce8e8; color: #c41230; }
+.badge-info { background: #e8f0fe; color: #1a56db; }
+.tag {
+    display: inline-block;
+    background: #1a56db;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+}
+.speed-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    font-size: 12px;
+    color: #444;
+    text-align: right;
+}
+.speed-table th:first-child { text-align: left; }
+.speed-table td { text-align: right; font-family: monospace; font-size: 13px; }
+.speed-table td:first-child { text-align: left; font-family: inherit; font-size: 14px; color: #555; font-weight: 500; }
+.speed-table td.highlight { color: #c41230; font-weight: 600; }
+footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <div class="opn">AM62x / AM62L / AM62A / AM62P OPN Parser</div>
+      <h1>AM62A74AVMHIANFR</h1>
+    </div>
+  </header>
+  <div class="body">
+<div class="section"><h2>Parsed Fields</h2><table><tr><td>Base Part</td><td><span class="tag">AM62A74</span></td></tr>
+<tr><td>Family</td><td>AM62A7 - Edge AI Vision SoC</td></tr>
+<tr><td>A53 Core Count</td><td>4 (Quad-core)</td></tr>
+<tr><td>Evolution Stage</td><td>Production</td></tr>
+<tr><td>Revision</td><td>SR1.0</td></tr>
+<tr><td>Speed Grade</td><td>V - A53 up to 1400 MHz, C7x up to 1000 MHz, LPDDR4 3733 MT/s</td></tr>
+<tr><td>Features</td><td>Base + MJPEG + Display Subsystem</td></tr>
+<tr><td>Security / Safety</td><td>Secure with Production Key / No Functional Safety</td></tr>
+<tr><td>Temperature</td><td>-40 to 125 C (125 C Industrial)</td></tr>
+<tr><td>Package</td><td>ANF - FCCSP BGA, 484-pin</td></tr>
+<tr><td>Tape & Reel</td><td><span class="badge badge-yes">Yes</span></td></tr>
+<tr><td>AEC-Q100 (Q1)</td><td><span class="badge badge-no">No</span></td></tr></table></div>
+<div class="section"><h2>Device Features (AM62A74)</h2><table><tr><td>A53 Cores</td><td>Quad Core</td></tr><tr><td>GPU</td><td><span class="badge badge-no">No</span></td></tr><tr><td>PRUSS</td><td><span class="badge badge-no">No</span></td></tr><tr><td>Cortex-M4F</td><td>Single Core Functional Safety Optional(4)</td></tr><tr><td>Security Controller</td><td><span class="badge badge-yes">Yes</span></td></tr><tr><td>Crypto Accelerators</td><td><span class="badge badge-yes">Yes</span></td></tr><tr><td>C7x AI Accel</td><td>Up to 2 TOPS</td></tr><tr><td>VPAC</td><td>Up to 5MP @ 60 fps</td></tr><tr><td>VENC/VDEC</td><td><span class="badge badge-yes">Yes</span></td></tr><tr><td>MJPEG</td><td><span class="badge badge-yes">Yes</span></td></tr><tr><td>CSI-RX</td><td>1</td></tr><tr><td>ADC</td><td><span class="badge badge-no">No</span></td></tr><tr><td>Display</td><td>1x DPI (Optional)</td></tr><tr><td>CAN</td><td>3</td></tr><tr><td>I2C</td><td>6</td></tr><tr><td>UART</td><td>9</td></tr><tr><td>SPI</td><td>5</td></tr><tr><td>McASP</td><td>3</td></tr><tr><td>eMMC</td><td>1x eMMC (8-bits)</td></tr><tr><td>USB 2.0</td><td>2</td></tr><tr><td>Ethernet (CPSW3G)</td><td><span class="badge badge-yes">Yes</span></td></tr><tr><td>GPIO</td><td>Up to 168</td></tr><tr><td>ePWM</td><td>3</td></tr><tr><td>eCAP</td><td>3</td></tr><tr><td>eQEP</td><td>3</td></tr><tr><td>Timers</td><td>12 (4 in MCU Channel)</td></tr><tr><td>OCSRAM Main</td><td>64KB</td></tr><tr><td>OCSRAM MCU</td><td>512KB</td></tr><tr><td>DDR Support</td><td>32-bit data with inline ECC up to 8GB</td></tr><tr><td>GPMC</td><td>Up to 128MB with ECC</td></tr><tr><td>OSPI/QSPI</td><td><span class="badge badge-yes">Yes</span></td></tr></table></div>
+<div class="section"><h2>Speed Grade V</h2><table class="speed-table"><tr><th>Subsystem</th><th>@ 0.75 V</th><th>@ 0.85 V</th></tr><tr><td>A53SS (Cortex-A53)</td><td class="highlight">1250 MHz</td><td class="highlight">1400 MHz</td></tr><tr><td>C7x AI Accel</td><td class="highlight">850 MHz</td><td class="highlight">1000 MHz</td></tr><tr><td>MAIN_SYSCLK</td><td>500 MHz</td><td>500 MHz</td></tr><tr><td>MCU R5F</td><td>800 / 400 MHz</td><td>800 / 400 MHz</td></tr><tr><td>Device Mgr R5F</td><td>800 / 400 MHz</td><td>800 / 400 MHz</td></tr><tr><td>HSM</td><td>400 MHz</td><td>400 MHz</td></tr><tr><td>VPAC</td><td>375 MHz</td><td>375 MHz</td></tr><tr><td>VENC/VDEC</td><td>400 MHz</td><td>400 MHz</td></tr><tr><td>MJPEG</td><td>250 MHz</td><td>250 MHz</td></tr><tr><td>LPDDR4</td><td>3733 MT/s</td><td>3733 MT/s</td></tr></table></div>
+<div class="section"><h2>Orderable Info</h2><table><tr><td>Orderable Part Number</td><td>AM62A74AVMHIANFR</td></tr><tr><td>Status</td><td>Active</td></tr><tr><td>Material Type</td><td>Production</td></tr><tr><td>Package | Pins</td><td>FCCSP (ANF) | 484</td></tr><tr><td>Package Qty | Carrier</td><td>500 | LARGE T&amp;R</td></tr><tr><td>RoHS</td><td>Yes</td></tr><tr><td>Lead Finish / Ball Material</td><td>Call TI</td></tr><tr><td>MSL Rating / Peak Reflow</td><td>Level-3-250C-168 HR</td></tr><tr><td>Op Temp (C)</td><td>-40 to 125</td></tr><tr><td>Part Marking</td><td>TI AM62A 74AVMHI</td></tr></table></div>
+  </div>
+</div>
+<footer>Generated by parse_opn_html.py &nbsp;&bull;&nbsp; Data sourced from TI datasheets</footer>
+</body>
+</html>
