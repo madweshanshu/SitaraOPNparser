@@ -1,5 +1,10 @@
 # OPN Parser - Project Log
 
+## Project Links
+
+- **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
+- **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser
+
 ## 2026-09-10
 
 - Log file created. Ready to document progress.
