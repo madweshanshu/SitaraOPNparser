@@ -1,0 +1,171 @@
+# Sitara OPN Parser
+
+Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display the device's capabilities, speed grades, and orderable information sourced directly from TI datasheets.
+
+## Supported Devices
+
+| Family | Base Parts | Speed Grades | Package(s) |
+|---|---|---|---|
+| AM62x (AM625/AM623/AM620-Q1) | AM6254/52/51, AM6234/32/31, AM6204/02/01 | G / K / S / T | ALW, AMC |
+| AM62L | AM62L32, AM62L31 | E / O | ANB |
+| AM62A | AM62A74/72, AM62A34/32/31, AM62A14/12 | M / N / O / P / Q / R / S / T / U / V | AMB, ANF |
+| AM62P | AM62P54/52, AM62P34/32 | O / S / T / U / V | AMH |
+
+## Quick Start
+
+```bash
+# Terminal output
+python3 parse_opn.py AM62P54CVMHIAMHR
+
+# Generate a styled HTML file (opens in browser)
+python3 parse_opn_html.py AM62P54CVMHIAMHR
+
+# Interactive web UI (type OPNs directly in the browser)
+python3 parse_opn_web.py
+```
+
+### Prerequisites
+
+```bash
+pip install pdfplumber   # only needed to re-extract data from PDFs
+```
+
+The three parser scripts (`parse_opn.py`, `parse_opn_html.py`, `parse_opn_web.py`) have **no external dependencies** beyond the standard library — they read only from the `master_*.csv` files included in the repo.
+
+## Usage
+
+### 1. Terminal (`parse_opn.py`)
+
+```
+python3 parse_opn.py <OPN>        decode a specific part number
+python3 parse_opn.py              interactive prompt
+python3 parse_opn.py -h           show help and field format reference
+```
+
+Output sections:
+- **Parsed Fields** — every field decoded with plain-English descriptions
+- **Device Features** — full feature table for this device variant
+- **Speed Grade** — max frequencies per subsystem, split by VDD_CORE voltage
+- **Orderable Info** — status, MSL rating, part marking from the datasheet
+
+### 2. Static HTML (`parse_opn_html.py`)
+
+```
+python3 parse_opn_html.py <OPN>
+```
+
+Writes `output.html` to the project directory and opens it in the default browser.
+
+### 3. Interactive Web UI (`parse_opn_web.py`)
+
+```
+python3 parse_opn_web.py          starts on http://localhost:8080
+python3 parse_opn_web.py 5000     custom port
+```
+
+Opens the browser automatically. Type any OPN into the search field and press Enter. Clickable example OPNs are shown on the welcome page.
+
+## OPN Format Reference
+
+### AM62x (SPRSP58C section 9.1.2)
+
+```
+[a] BBBBBB r Z f Y y t PPP [R][Q1]
+```
+
+| Field | Meaning | Values |
+|---|---|---|
+| a | Evolution stage | (blank)=Production, X=Experimental, P=Preproduction |
+| BBBBBB | Base part (6 chars) | AM6254, AM6252, AM6251, AM6234, AM6232, AM6231, AM6204, AM6202, AM6201 |
+| r | Silicon revision | A=SR1.0, B=SR1.1 |
+| Z | Speed grade | G=300MHz, K=800MHz, S=1000MHz, T=1400MHz |
+| f | Features | G=Base, C=Base+PRUSS |
+| Y | Functional safety | G=Non-FS, F=Functional Safety |
+| y | Security | G=Non-Secure, other=Secure |
+| t | Temperature | A=-40 to 105C, H=0 to 95C, I=-40 to 125C |
+| PPP | Package | ALW=FCCSP 425-pin, AMC=FCBGA 441-pin |
+| R | Tape & reel | (present=reel, omit=tray) |
+| Q1 | AEC-Q100 | (present=automotive qualified) |
+
+### AM62L (SPRSPA1B section 9.1.2)
+
+```
+[a] BBBBBBB r Z f Y t PPP [R][Q1]
+```
+
+Same structure as AM62x but: 7-char base part, security+FS combined into one Y field, speed grades E/O, package ANB only.
+
+| Y value | Meaning |
+|---|---|
+| 1–9 | Secure with Dummy Key / No Functional Safety |
+| H–R | Secure with Production Key / No Functional Safety |
+| S–Z | Secure with Production Key / Functional Safety |
+
+### AM62A (SPRSP77E section 9.1.2)
+
+```
+[a] BBBBBBB r Z f Y t PPP [R][Q1]
+```
+
+Same 5-field structure as AM62L. Speed grades M–V (10 grades). Features: G=Base, L=+MJPEG, M=+MJPEG+Display. Packages: AMB (FCBGA 484), ANF (FCCSP 484).
+
+### AM62P (SPRSP89E section 9.1.2)
+
+```
+[a] BBBBBBB r Z f Y t PPP [Q1]
+```
+
+Same 5-field structure. Revisions A/B/C. Speed grades O/S/T/U/V. Features: G=Base, M=+MJPEG+Display. Temperature I only. Package: AMH (FCBGA 466). Q1 also changes eMMC speed (HS400 vs HS200).
+
+## File Structure
+
+```
+sitara-opn-parser/
+├── parse_opn.py            Terminal parser (main script)
+├── parse_opn_html.py       Static HTML output
+├── parse_opn_web.py        Interactive web UI
+│
+├── master_orderable.csv    All OPNs (source of truth, 127 rows)
+├── master_features.csv     One row per device variant (22 rows)
+├── master_speed_grades.csv Speed grades for all families (21 rows)
+│
+├── build_master_csv.py     Rebuilds master CSVs from raw extracted CSVs
+├── extract_tables.py       Extracts raw tables from datasheet PDFs (bootstrap)
+│
+├── am62*.pdf               Datasheet PDFs (bootstrap only)
+├── am62*_*.csv             Raw extracted tables (bootstrap only)
+└── LOG.md                  Development log
+```
+
+The three `master_*.csv` files are the single source of truth. The PDFs and raw CSVs are only needed to regenerate them.
+
+## Data Architecture
+
+```
+PDFs  →  extract_tables.py  →  raw CSVs  →  build_master_csv.py  →  master_*.csv
+                                                                           ↓
+                                                                    parse_opn.py
+                                                                    parse_opn_html.py
+                                                                    parse_opn_web.py
+```
+
+The parsers load the three master CSVs at startup. No PDF access at runtime.
+
+## Adding a New Device Family
+
+1. Download the datasheet PDF to the project directory.
+2. Add page ranges and an `extract_<family>()` function to `extract_tables.py`.
+3. Run `python3 extract_tables.py` to produce raw CSVs.
+4. Add device meta, feature mapping, and speed grade processing to `build_master_csv.py`.
+5. Run `python3 build_master_csv.py` to regenerate the master CSVs.
+6. Add base parts, speed grades, features, and package codes to `parse_opn.py`.
+7. Add the new speed grade display columns to `SPEED_DISPLAY_COLS` in `parse_opn.py`.
+
+## Datasheet References
+
+| Device | Document | Naming Convention Section |
+|---|---|---|
+| AM62x | SPRSP58C | Section 9.1.2 |
+| AM62L | SPRSPA1B | Section 9.1.2 |
+| AM62A | SPRSP77E | Section 9.1.2 |
+| AM62P | SPRSP89E | Section 9.1.2 |
