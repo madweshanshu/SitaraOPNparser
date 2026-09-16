@@ -316,7 +316,7 @@ def build_speed_grades():
 FEATURES_HEADER = [
     "Device Line", "Base Part", "Family", "Description", "A53 Cores",
     "Speed Grades Available",
-    "GPU", "PRUSS", "Cortex-M4F", "Security Controller",
+    "GPU", "PRUSS", "MCU Core", "Security Controller",
     "Crypto Accelerators",
     # AM62A-specific accelerators
     "C7x AI Accel", "VPAC", "VENC/VDEC", "MJPEG",
@@ -337,7 +337,7 @@ AM62X_FEAT_MAP = {
     "Arm Cortex-A53 Microprocessor Subsystem":                   "A53 Cores",
     "3D Graphics Engine (OpenGL ES 3.1, Vulkan 1.2)":            "GPU",
     "Programmable Real-Time Unit Subsystem(3)":                  "PRUSS",
-    "Arm Cortex-M4F in MCU domain":                              "Cortex-M4F",
+    "Arm Cortex-M4F in MCU domain":                              "MCU Core",
     "Crypto Accelerators":                                        "Crypto Accelerators",
     "CSI2-RX Controller with DPHY":                              "CSI-RX",
     "Display Subsystem":                                          "Display",
@@ -410,7 +410,7 @@ AM62L_DEVICE_META = {
 
 AM62A_FEAT_MAP = {
     "Arm Cortex-A53 Microprocessor Subsystem":           "A53 Cores",
-    "Arm Cortex-R5F in MCU domain":                      "Cortex-M4F",   # R5F fills same safety role
+    "Arm Cortex-R5F in MCU domain":                      "MCU Core",
     "C7xV-256 Deep Learning Accelerator":                "C7x AI Accel",
     "Vision Processing Accelerators":                    "VPAC",
     "Video Encoder / Decoder":                           "VENC/VDEC",
@@ -441,7 +441,7 @@ AM62A_FEAT_MAP = {
 
 AM62P_FEAT_MAP = {
     "Arm Cortex-A53 Microprocessor Subsystem":            "A53 Cores",
-    "Arm Cortex-R5F in MCU domain":                       "Cortex-M4F",
+    "Arm Cortex-R5F in MCU domain":                       "MCU Core",
     "Graphics Processing Unit":                           "GPU",
     "Video Encoder / Decoder":                            "VENC/VDEC",
     "Hardware Security Module":                           "Security Controller",
@@ -569,7 +569,7 @@ def build_features():
             "A53 Cores":            f.get("A53 Cores", ""),
             "GPU":                  f.get("GPU", ""),
             "PRUSS":                f.get("PRUSS", ""),
-            "Cortex-M4F":           f.get("Cortex-M4F", ""),
+            "MCU Core":             ("Cortex-M4F - " + f.get("MCU Core")) if f.get("MCU Core") else "",
             "Security Controller":  "Yes",
             "Crypto Accelerators":  f.get("Crypto Accelerators", ""),
             "CSI-RX":               f.get("CSI-RX", ""),
@@ -626,7 +626,7 @@ def build_features():
             "A53 Cores":            f.get("A53 Cores", ""),
             "GPU":                  "No",
             "PRUSS":                "No",
-            "Cortex-M4F":           "No",
+            "MCU Core":             "No",
             "Security Controller":  f.get("Security Controller", ""),
             "Crypto Accelerators":  f.get("Crypto Accelerators", ""),
             "CSI-RX":               "No",
@@ -696,7 +696,7 @@ def build_features():
             "A53 Cores":            f.get("A53 Cores", ""),
             "GPU":                  "No",
             "PRUSS":                "No",
-            "Cortex-M4F":           f.get("Cortex-M4F", ""),
+            "MCU Core":             ("Cortex-R5F - " + f.get("MCU Core")) if f.get("MCU Core") else "",
             "Security Controller":  f.get("Security Controller", ""),
             "Crypto Accelerators":  f.get("Crypto Accelerators", ""),
             "C7x AI Accel":         f.get("C7x AI Accel", ""),
@@ -764,7 +764,7 @@ def build_features():
             "A53 Cores":            f.get("A53 Cores", ""),
             "GPU":                  f.get("GPU", ""),
             "PRUSS":                "No",
-            "Cortex-M4F":           f.get("Cortex-M4F", ""),
+            "MCU Core":             ("Cortex-R5F - " + f.get("MCU Core")) if f.get("MCU Core") else "",
             "Security Controller":  f.get("Security Controller", ""),
             "Crypto Accelerators":  f.get("Crypto Accelerators", ""),
             "VENC/VDEC":            f.get("VENC/VDEC", ""),

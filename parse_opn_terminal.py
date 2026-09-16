@@ -38,7 +38,7 @@ ORDERABLE_COLS = [
 ]
 
 FEATURE_COLS = [
-    "A53 Cores", "GPU", "PRUSS", "Cortex-M4F", "Security Controller",
+    "A53 Cores", "GPU", "PRUSS", "MCU Core", "Security Controller",
     "Crypto Accelerators", "C7x AI Accel", "VPAC", "VENC/VDEC", "MJPEG", "VPU",
     "CSI-RX", "ADC", "Display", "CAN", "I2C", "UART", "SPI", "McASP",
     "eMMC", "SD/SDIO", "USB 2.0", "Ethernet (CPSW3G)", "GPIO",

@@ -2,6 +2,8 @@
 
 ## Project Links
 
+- **Live App**: https://madweshanshu.github.io/SitaraOPNparser/
+- **GitHub**: https://github.com/madweshanshu/SitaraOPNparser
 - **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
 - **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser
 
