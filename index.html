@@ -75,6 +75,38 @@ tr:nth-child(even) { background: #fafafa; }
 .example-btn:hover { background: #e2e6ec; }
 .loading { text-align: center; padding: 20px; color: #888; font-style: italic; }
 footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+
+/* Compare mode */
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab-btn {
+  padding: 8px 22px; border: 2px solid #c41230; border-radius: 6px;
+  background: white; color: #c41230; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.tab-btn.active { background: #c41230; color: white; }
+.tab-btn:hover:not(.active) { background: #fce8e8; }
+.compare-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.compare-row { display: flex; gap: 8px; align-items: center; }
+.compare-row input {
+  flex: 1; padding: 9px 12px; font-size: 14px; font-family: monospace;
+  border: 2px solid #ddd; border-radius: 6px; outline: none; transition: border-color .2s;
+}
+.compare-row input:focus { border-color: #c41230; }
+.remove-btn {
+  background: none; border: none; color: #bbb; font-size: 20px;
+  cursor: pointer; line-height: 1; padding: 0 6px; transition: color .15s;
+}
+.remove-btn:hover { color: #c41230; }
+.cmp-table { table-layout: fixed; }
+.cmp-table th {
+  background: #f5f5f5; font-size: 12px; font-weight: 600; padding: 8px 10px;
+  text-align: left; border-bottom: 2px solid #e0e0e0; word-break: break-all;
+}
+.cmp-table td { vertical-align: top; padding: 6px 10px; }
+.cmp-label { color: #555; font-weight: 500; white-space: nowrap; }
+.cmp-same td { color: #bbb !important; background: #fafafa; }
+.cmp-same .badge-yes, .cmp-same .badge-no { opacity: 0.4; }
+.cmp-diff { background: #fff8e1; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -86,13 +118,39 @@ footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
     </div>
   </header>
   <div class="body">
-    <div class="search-bar">
-      <input type="text" id="opn-input" placeholder="Enter OPN e.g. AM62P54CVMHIAMHR"
-             autocomplete="off" spellcheck="false">
-      <button id="search-btn" onclick="doSearch()">Search</button>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setMode('search')">Search</button>
+      <button class="tab-btn"        onclick="setMode('compare')">Compare</button>
     </div>
-    <div id="results">
-      <div class="loading" id="loading-msg">Loading device data&hellip;</div>
+
+    <div id="search-mode">
+      <div class="search-bar">
+        <input type="text" id="opn-input" placeholder="Enter OPN e.g. AM62P54CVMHIAMHR"
+               autocomplete="off" spellcheck="false">
+        <button id="search-btn" onclick="doSearch()">Search</button>
+      </div>
+      <div id="results">
+        <div class="loading" id="loading-msg">Loading device data&hellip;</div>
+      </div>
+    </div>
+
+    <div id="compare-mode" style="display:none">
+      <div class="compare-inputs" id="compare-inputs"></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+        <button id="add-btn" onclick="addInput()"
+                style="padding:8px 16px;border:2px solid #c41230;border-radius:6px;background:white;color:#c41230;font-weight:600;cursor:pointer">
+          + Add device
+        </button>
+        <button onclick="doCompare()"
+                style="padding:8px 22px;background:#c41230;color:white;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">
+          Compare
+        </button>
+        <label style="margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#555">
+          <input type="checkbox" id="diff-only" onchange="doCompare()">
+          Show differences only
+        </label>
+      </div>
+      <div id="compare-results"></div>
     </div>
   </div>
 </div>
@@ -475,6 +533,198 @@ function doSearch() {
 document.getElementById('opn-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') doSearch();
 });
+
+// ---------------------------------------------------------------------------
+// 5. Compare mode
+// ---------------------------------------------------------------------------
+
+function setMode(m) {
+  document.getElementById('search-mode').style.display  = m === 'search'  ? '' : 'none';
+  document.getElementById('compare-mode').style.display = m === 'compare' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) =>
+    b.classList.toggle('active', (i === 0) === (m === 'search')));
+  if (m === 'compare' && document.querySelectorAll('.compare-row').length === 0) {
+    addInput(); addInput();
+  }
+}
+
+function syncAddBtn() {
+  document.getElementById('add-btn').disabled =
+    document.querySelectorAll('.compare-row').length >= 5;
+}
+
+function addInput() {
+  if (document.querySelectorAll('.compare-row').length >= 5) return;
+  const div = document.createElement('div');
+  div.className = 'compare-row';
+  div.innerHTML =
+    '<input type="text" placeholder="Enter OPN e.g. AM6254ATCGHAALW" autocomplete="off" spellcheck="false">' +
+    '<button class="remove-btn" onclick="removeInput(this)" title="Remove">&#xd7;</button>';
+  div.querySelector('input').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') doCompare();
+  });
+  document.getElementById('compare-inputs').appendChild(div);
+  syncAddBtn();
+}
+
+function removeInput(btn) {
+  if (document.querySelectorAll('.compare-row').length <= 2) return;
+  btn.parentElement.remove();
+  syncAddBtn();
+}
+
+function doCompare() {
+  const opns = [...document.querySelectorAll('.compare-row input')]
+    .map(i => i.value.trim()).filter(Boolean);
+  const out = document.getElementById('compare-results');
+  if (opns.length < 2) {
+    out.innerHTML = '<div class="error-box">Enter at least 2 OPNs to compare.</div>';
+    return;
+  }
+  const items = opns.map(raw => {
+    const parsed = parseOPN(raw);
+    if (parsed.error) return { raw, error: parsed.error, parsed: null, row: null };
+    const key = raw.toUpperCase().split('.')[0];
+    const row = BY_OPN[key] || BY_BASE[parsed.base] || null;
+    return { raw, error: null, parsed, row };
+  });
+  const diffOnly = document.getElementById('diff-only').checked;
+  out.innerHTML =
+    renderCmpParsed(items, diffOnly) +
+    renderCmpFeatures(items, diffOnly) +
+    renderCmpSpeedGrade(items, diffOnly) +
+    renderCmpOrderable(items, diffOnly);
+}
+
+// Core comparison table builder.
+// labelledRows: [{label, values: string[]}] — one value per item, in order.
+function buildCmpSection(title, items, labelledRows, diffOnly) {
+  const hdrs = items.map(item =>
+    item.error
+      ? `<th style="color:#c41230">Parse error<br><small style="font-weight:400">${e(item.raw)}</small></th>`
+      : `<th>${e(item.raw)}<br><small style="font-weight:400;color:#777">${e(item.parsed.info.line)}</small></th>`
+  ).join('');
+
+  const trs = [];
+  for (const {label, values} of labelledRows) {
+    const allSame = values.every(v => v === values[0]);
+    if (diffOnly && allSame) continue;
+    const rowCls = allSame ? ' class="cmp-same"' : '';
+    const tds = values.map((v, i) => {
+      const isDiff = !allSame && v !== values[0];
+      const tdCls = allSame ? '' : (isDiff ? ' class="cmp-diff"' : '');
+      const rendered = v === '—'
+        ? '<span style="color:#ccc">&#8212;</span>'
+        : (v.toLowerCase() === 'yes' || v.toLowerCase() === 'no') ? badge(v) : e(v);
+      return `<td${tdCls}>${rendered}</td>`;
+    }).join('');
+    trs.push(`<tr${rowCls}><td class="cmp-label">${e(label)}</td>${tds}</tr>`);
+  }
+
+  if (!trs.length) {
+    const msg = diffOnly ? 'All values are identical.' : 'No data.';
+    return `<div class="section"><h2>${e(title)}</h2><p style="color:#888">${msg}</p></div>`;
+  }
+
+  const colW = Math.floor(100 / (items.length + 1));
+  return `<div class="section"><h2>${e(title)}</h2>
+    <div style="overflow-x:auto">
+    <table class="cmp-table" style="table-layout:auto">
+      <tr><th style="width:220px"></th>${hdrs}</tr>
+      ${trs.join('\n      ')}
+    </table></div></div>`;
+}
+
+function renderCmpParsed(items, diffOnly) {
+  const ALL_LABELS = [
+    'Base Part','Family','A53 Core Count','Evolution Stage','Revision',
+    'Speed Grade','Features','Functional Safety','Security','Security / Safety',
+    'Temperature','Package','Tape & Reel','AEC-Q100 (Q1)',
+  ];
+
+  const maps = items.map(item => {
+    if (item.error) return null;
+    const {parsed, row} = item;
+    const {info, evolution, base, revision, speed, feat,
+           funcSafety, security, securityFS, temp, pkg, tapeReel, q1} = parsed;
+    const dl = info.line;
+    const family = (row && row['Family']) || info.family;
+    const desc   = (row && row['Description']) || info.desc;
+    const m = {};
+    m['Base Part']       = base;
+    m['Family']          = `${family} — ${desc}`;
+    m['A53 Core Count']  = `${info.cores} (${CORE_LABEL[info.cores] || ''})`;
+    m['Evolution Stage'] = EVOLUTION[evolution] || evolution;
+    m['Revision']        = REVISION[revision] || revision;
+    m['Speed Grade']     = (SPEED_LABELS[dl] || {})[speed] || speed;
+    m['Features']        = (FEAT_LABELS[dl]  || {})[feat]  || feat;
+    if (dl === 'AM62x') {
+      m['Functional Safety'] = funcSafety === 'G' ? 'Non-Functional Safety'
+                             : funcSafety === 'F' ? 'Functional Safety (ISO 26262)' : funcSafety;
+      m['Security']          = security === 'G' ? 'Non-Secure' : `Secure (${security})`;
+    } else {
+      m['Security / Safety'] = decodeSecurityFS(securityFS);
+    }
+    m['Temperature']    = (dl === 'AM62x' ? TEMP_LABELS.AM62x : TEMP_LABELS.other)[temp] || temp;
+    m['Package']        = `${pkg} — ${PACKAGES[pkg] || ''}`;
+    m['Tape & Reel']    = tapeReel ? 'Yes' : 'No';
+    m['AEC-Q100 (Q1)']  = q1 ? 'Yes' : 'No';
+    return m;
+  });
+
+  const usedLabels = ALL_LABELS.filter(lbl => maps.some(m => m && m[lbl] !== undefined));
+  const labelledRows = usedLabels.map(lbl => ({
+    label: lbl,
+    values: maps.map((m, i) =>
+      items[i].error ? 'Error' : (m && m[lbl] !== undefined ? m[lbl] : '—')
+    ),
+  }));
+
+  return buildCmpSection('Parsed Fields', items, labelledRows, diffOnly);
+}
+
+function renderCmpFeatures(items, diffOnly) {
+  const labelledRows = FEATURE_COLS
+    .map(col => ({
+      label: col,
+      values: items.map(item =>
+        (item.error || !item.row) ? '—' : ((item.row[col] || '').trim() || '—')
+      ),
+    }))
+    .filter(r => r.values.some(v => v !== '—'));
+  return buildCmpSection('Device Features', items, labelledRows, diffOnly);
+}
+
+function renderCmpSpeedGrade(items, diffOnly) {
+  const seen = new Set();
+  const labelledRows = [];
+  SPEED_COLS.forEach(([c75, c85, label]) => {
+    if (seen.has(label)) return;
+    const values = items.map(item => {
+      if (item.error || !item.row) return '—';
+      const v75 = (item.row[c75] || '').trim();
+      if (!v75) return '—';
+      const v85 = c85 ? ((item.row[c85] || '').trim() || v75) : null;
+      return (v85 && v85 !== v75) ? `${v75} / ${v85} MHz` : `${v75} MHz`;
+    });
+    if (values.every(v => v === '—')) return;
+    seen.add(label);
+    labelledRows.push({ label, values });
+  });
+  return buildCmpSection('Speed Grade', items, labelledRows, diffOnly);
+}
+
+function renderCmpOrderable(items, diffOnly) {
+  const labelledRows = ORDERABLE_COLS
+    .map(col => ({
+      label: col,
+      values: items.map(item =>
+        (item.error || !item.row) ? '—' : ((item.row[col] || '').trim() || '—')
+      ),
+    }))
+    .filter(r => r.values.some(v => v !== '—'));
+  return buildCmpSection('Orderable Info', items, labelledRows, diffOnly);
+}
 
 // Load data on startup
 document.getElementById('search-btn').disabled = true;
