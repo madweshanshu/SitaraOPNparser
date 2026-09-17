@@ -9,8 +9,10 @@
 
 | Branch | Purpose |
 |---|---|
-| `main` (GitHub) / `master` (Bitbucket) | Stable — deploys to GitHub Pages |
-| `dev` | Active development — merge to main/master when ready |
+| `main` (GitHub) / `master` (Bitbucket) | Stable — deploys to GitHub Pages live app |
+| `dev` | Active development — auto-deploys to `/dev/` preview on every push |
+
+**Preview URL**: https://madweshanshu.github.io/SitaraOPNparser/dev/
 
 Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display the device's capabilities, speed grades, and orderable information sourced directly from TI datasheets.
 
