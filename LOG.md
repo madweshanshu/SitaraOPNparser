@@ -7,6 +7,16 @@
 - **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
 - **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser
 
+## Branch Strategy
+
+- **main** (GitHub) / **master** (Bitbucket) - stable, deployed to GitHub Pages
+- **dev** - active development; merge to main/master when features are ready
+
+## Planned Features (dev branch)
+
+### Device Comparison
+Load up to 5 OPNs side-by-side and highlight differences across all feature, speed grade, and orderable fields. Identical values shown in muted style; differing values highlighted so selection differences are immediately visible.
+
 ## 2026-09-10
 
 - Log file created. Ready to document progress.
