@@ -4,13 +4,13 @@
 
 - **Live App**: https://madweshanshu.github.io/SitaraOPNparser/
 - **GitHub**: https://github.com/madweshanshu/SitaraOPNparser
-- **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
 - **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser
 
 ## Branch Strategy
 
-- **main** (GitHub) / **master** (Bitbucket) - stable, deployed to GitHub Pages
-- **dev** - active development; merge to main/master when features are ready
+- **main** - stable, deployed to GitHub Pages
+- **dev** - active development; merge to main when features are ready
+- **Dev preview**: https://madweshanshu.github.io/SitaraOPNparser/dev/ (auto-deploys on push to dev)
 
 ## Planned Features (dev branch)
 
