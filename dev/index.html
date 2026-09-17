@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sitara OPN Parser</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a1a;
+  padding: 24px;
+  font-size: 14px;
+}
+.container { max-width: 960px; margin: 0 auto; }
+header {
+  background: #c41230;
+  color: white;
+  padding: 18px 24px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+header h1 { font-size: 20px; font-weight: 600; }
+header .sub { font-size: 13px; opacity: 0.85; }
+.body { background: white; border-radius: 0 0 8px 8px; padding: 24px; }
+.search-bar {
+  display: flex; gap: 10px; margin-bottom: 28px; align-items: center;
+}
+.search-bar input[type=text] {
+  flex: 1; padding: 10px 14px; font-size: 15px;
+  border: 2px solid #ddd; border-radius: 6px;
+  font-family: monospace; outline: none; transition: border-color .2s;
+}
+.search-bar input[type=text]:focus { border-color: #c41230; }
+.search-bar button {
+  padding: 10px 22px; background: #c41230; color: white;
+  border: none; border-radius: 6px; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.search-bar button:hover { background: #a00f26; }
+.search-bar button:disabled { background: #aaa; cursor: default; }
+.section { margin-bottom: 28px; }
+.section h2 {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: #c41230;
+  border-bottom: 2px solid #c41230; padding-bottom: 6px; margin-bottom: 14px;
+}
+table { width: 100%; border-collapse: collapse; }
+td, th { padding: 7px 12px; text-align: left; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+td:first-child { color: #555; width: 220px; font-weight: 500; white-space: nowrap; }
+tr:nth-child(even) { background: #fafafa; }
+.speed-table th { background: #f5f5f5; font-weight: 600; font-size: 12px; color: #444; text-align: right; }
+.speed-table th:first-child { text-align: left; }
+.speed-table td { text-align: right; font-family: monospace; font-size: 13px; }
+.speed-table td:first-child { text-align: left; font-family: inherit; font-size: 14px; color: #555; font-weight: 500; }
+.speed-table td.diff { color: #c41230; font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+.badge-yes  { background: #e6f4ea; color: #1e7e34; }
+.badge-no   { background: #fce8e8; color: #c41230; }
+.tag { display: inline-block; background: #1a56db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.error-box { background: #fce8e8; border-left: 4px solid #c41230; padding: 14px 18px; border-radius: 4px; color: #7a0e1e; }
+.welcome { text-align: center; padding: 40px 20px; color: #888; }
+.welcome h3 { font-size: 18px; margin-bottom: 10px; color: #555; }
+.welcome p  { font-size: 13px; line-height: 1.7; }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+.example-btn {
+  background: #f0f2f5; border: 1px solid #d0d4db; border-radius: 20px;
+  padding: 5px 14px; font-size: 12px; font-family: monospace;
+  cursor: pointer; transition: background .15s;
+}
+.example-btn:hover { background: #e2e6ec; }
+.loading { text-align: center; padding: 20px; color: #888; font-style: italic; }
+footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+
+/* Compare mode */
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab-btn {
+  padding: 8px 22px; border: 2px solid #c41230; border-radius: 6px;
+  background: white; color: #c41230; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.tab-btn.active { background: #c41230; color: white; }
+.tab-btn:hover:not(.active) { background: #fce8e8; }
+.compare-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.compare-row { display: flex; gap: 8px; align-items: center; }
+.compare-row input {
+  flex: 1; padding: 9px 12px; font-size: 14px; font-family: monospace;
+  border: 2px solid #ddd; border-radius: 6px; outline: none; transition: border-color .2s;
+}
+.compare-row input:focus { border-color: #c41230; }
+.remove-btn {
+  background: none; border: none; color: #bbb; font-size: 20px;
+  cursor: pointer; line-height: 1; padding: 0 6px; transition: color .15s;
+}
+.remove-btn:hover { color: #c41230; }
+.cmp-table { table-layout: fixed; }
+.cmp-table th {
+  background: #f5f5f5; font-size: 12px; font-weight: 600; padding: 8px 10px;
+  text-align: left; border-bottom: 2px solid #e0e0e0; word-break: break-all;
+}
+.cmp-table td { vertical-align: top; padding: 6px 10px; }
+.cmp-label { color: #555; font-weight: 500; white-space: nowrap; }
+.cmp-same td { color: #bbb !important; background: #fafafa; }
+.cmp-same .badge-yes, .cmp-same .badge-no { opacity: 0.4; }
+.cmp-diff { background: #fff8e1; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <div class="sub">AM62x &bull; AM62L &bull; AM62A &bull; AM62P</div>
+      <h1>Sitara OPN Parser</h1>
+    </div>
+  </header>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setMode('search')">Search</button>
+      <button class="tab-btn"        onclick="setMode('compare')">Compare</button>
+    </div>
+
+    <div id="search-mode">
+      <div class="search-bar">
+        <input type="text" id="opn-input" placeholder="Enter OPN e.g. AM62P54CVMHIAMHR"
+               autocomplete="off" spellcheck="false">
+        <button id="search-btn" onclick="doSearch()">Search</button>
+      </div>
+      <div id="results">
+        <div class="loading" id="loading-msg">Loading device data&hellip;</div>
+      </div>
+    </div>
+
+    <div id="compare-mode" style="display:none">
+      <div class="compare-inputs" id="compare-inputs"></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+        <button id="add-btn" onclick="addInput()"
+                style="padding:8px 16px;border:2px solid #c41230;border-radius:6px;background:white;color:#c41230;font-weight:600;cursor:pointer">
+          + Add device
+        </button>
+        <button onclick="doCompare()"
+                style="padding:8px 22px;background:#c41230;color:white;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">
+          Compare
+        </button>
+        <label style="margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#555">
+          <input type="checkbox" id="diff-only" onchange="doCompare()">
+          Show differences only
+        </label>
+      </div>
+      <div id="compare-results"></div>
+    </div>
+  </div>
+</div>
+<footer>Sitara OPN Parser &bull; Data from TI datasheets &bull;
+  <a href="https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse" style="color:#c41230">Bitbucket</a>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// 1. CSV loader
+// ---------------------------------------------------------------------------
+const CSV_URL = 'data/master.csv';
+
+let BY_OPN  = {};   // uppercased OPN -> row object
+let BY_BASE = {};   // base part    -> first row for that base
+
+async function loadData() {
+  try {
+    const resp = await fetch(CSV_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    rows.forEach(r => {
+      const key = r['Orderable Part Number'].toUpperCase().replace(/\.B$/, '');
+      if (!BY_OPN[key])  BY_OPN[key]  = r;
+      if (!BY_BASE[r['Base Part']]) BY_BASE[r['Base Part']] = r;
+    });
+    document.getElementById('loading-msg').remove();
+    showWelcome();
+    document.getElementById('search-btn').disabled = false;
+    document.getElementById('opn-input').focus();
+  } catch(e) {
+    document.getElementById('loading-msg').textContent = 'Failed to load device data: ' + e.message;
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.split('\n');
+  const headers = parseLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, j) => obj[h] = (vals[j] || '').trim());
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function parseLine(line) {
+  const cols = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { cols.push(cur); cur = ''; }
+    else cur += c;
+  }
+  cols.push(cur);
+  return cols;
+}
+
+// ---------------------------------------------------------------------------
+// 2. Naming convention decoder (ported from parse_opn_engine.py)
+// ---------------------------------------------------------------------------
+
+const BASE_PARTS = {
+  AM6254:{family:'AM625',   line:'AM62x',cores:4,desc:'Human-machine Interaction SoC'},
+  AM6252:{family:'AM625',   line:'AM62x',cores:2,desc:'Human-machine Interaction SoC'},
+  AM6251:{family:'AM625',   line:'AM62x',cores:1,desc:'Human-machine Interaction SoC'},
+  AM6234:{family:'AM623',   line:'AM62x',cores:4,desc:'IoT and Gateway SoC'},
+  AM6232:{family:'AM623',   line:'AM62x',cores:2,desc:'IoT and Gateway SoC'},
+  AM6231:{family:'AM623',   line:'AM62x',cores:1,desc:'IoT and Gateway SoC'},
+  AM6204:{family:'AM620-Q1',line:'AM62x',cores:4,desc:'Automotive Display SoC'},
+  AM6202:{family:'AM620-Q1',line:'AM62x',cores:2,desc:'Automotive Display SoC'},
+  AM6201:{family:'AM620-Q1',line:'AM62x',cores:1,desc:'Automotive Display SoC'},
+  AM62L32:{family:'AM62L',  line:'AM62L',cores:2,desc:'Low-power IoT/HMI SoC'},
+  AM62L31:{family:'AM62L',  line:'AM62L',cores:1,desc:'Low-power IoT/HMI SoC'},
+  AM62A74:{family:'AM62A7', line:'AM62A',cores:4,desc:'Edge AI Vision SoC'},
+  AM62A72:{family:'AM62A7', line:'AM62A',cores:2,desc:'Edge AI Vision SoC'},
+  AM62A34:{family:'AM62A3', line:'AM62A',cores:4,desc:'Edge AI Vision SoC'},
+  AM62A32:{family:'AM62A3', line:'AM62A',cores:2,desc:'Edge AI Vision SoC'},
+  AM62A31:{family:'AM62A3', line:'AM62A',cores:1,desc:'Edge AI Vision SoC'},
+  AM62A14:{family:'AM62A1-Q1',line:'AM62A',cores:4,desc:'Edge AI Vision SoC (Automotive)'},
+  AM62A12:{family:'AM62A1-Q1',line:'AM62A',cores:2,desc:'Edge AI Vision SoC (Automotive)'},
+  AM62P54:{family:'AM62P5', line:'AM62P',cores:4,desc:'Premium HMI SoC with GPU'},
+  AM62P52:{family:'AM62P5', line:'AM62P',cores:2,desc:'Premium HMI SoC with GPU'},
+  AM62P34:{family:'AM62P3', line:'AM62P',cores:4,desc:'Premium HMI SoC without GPU'},
+  AM62P32:{family:'AM62P3', line:'AM62P',cores:2,desc:'Premium HMI SoC without GPU'},
+};
+const PACKAGES = {
+  ALW:'FCCSP BGA, 425-pin, 13x13mm',
+  AMC:'FCBGA, 441-pin, 17.2x17.2mm',
+  ANB:'FCCSP BGA, 373-pin, 11.8x12mm',
+  AMB:'FCBGA, 484-pin',
+  ANF:'FCCSP BGA, 484-pin',
+  AMH:'FCBGA, 466-pin',
+};
+const REVISION = {A:'SR1.0', B:'SR1.1', C:'SR1.2'};
+const EVOLUTION = {'':'Production', X:'Experimental', P:'Preproduction'};
+const CORE_LABEL = {1:'Single-core', 2:'Dual-core', 4:'Quad-core'};
+
+const SPEED_LABELS = {
+  AM62x: {G:'G - A53 300 MHz',K:'K - A53 800 MHz',S:'S - A53 1000 MHz',T:'T - A53 1400 MHz'},
+  AM62L: {E:'E - A53 833 MHz', O:'O - A53 1250 MHz'},
+  AM62A: {
+    M:'M - A53 800 MHz,  C7x 500 MHz,  3200 MT/s', N:'N - A53 800 MHz,  C7x 1000 MHz, 3200 MT/s',
+    O:'O - A53 1000 MHz, C7x 500 MHz,  3200 MT/s', P:'P - A53 1000 MHz, C7x 500 MHz,  3733 MT/s',
+    Q:'Q - A53 1000 MHz, C7x 1000 MHz, 3200 MT/s', R:'R - A53 1000 MHz, C7x 1000 MHz, 3733 MT/s',
+    S:'S - A53 1400 MHz, C7x 500 MHz,  3200 MT/s', T:'T - A53 1400 MHz, C7x 500 MHz,  3733 MT/s',
+    U:'U - A53 1400 MHz, C7x 1000 MHz, 3200 MT/s', V:'V - A53 1400 MHz, C7x 1000 MHz, 3733 MT/s',
+  },
+  AM62P: {
+    O:'O - A53 1000 MHz, GPU 560 MHz,      3200 MT/s',
+    S:'S - A53 1400 MHz, GPU 560 MHz,      3200 MT/s',
+    T:'T - A53 1400 MHz, GPU 320 MHz,      3200 MT/s',
+    U:'U - A53 1400 MHz, GPU up to 800 MHz, 3200 MT/s',
+    V:'V - A53 1400 MHz, GPU up to 800 MHz, 3733 MT/s',
+  },
+};
+const FEAT_LABELS = {
+  AM62x: {G:'Base (no additional features)', C:'Base + PRU Subsystem (PRUSS)'},
+  AM62L: {G:'Base'},
+  AM62A: {G:'Base (no display, no MJPEG)', L:'Base + MJPEG Encoder', M:'Base + MJPEG + Display'},
+  AM62P: {G:'Base (no display, no MJPEG)', M:'Base + MJPEG + Display'},
+};
+const TEMP_LABELS = {
+  AM62x: {A:'-40 to 105°C (Extended Industrial)', H:'0 to 95°C (Commercial)', I:'-40 to 125°C (Automotive)'},
+  other: {A:'-40 to 105°C (Extended Industrial)', I:'-40 to 125°C (Industrial/Automotive)'},
+};
+
+function decodeSecurityFS(code) {
+  if (!code) return '';
+  const c = code.toUpperCase();
+  if (c >= '1' && c <= '9') return 'Secure with Dummy Key / No Functional Safety';
+  if (c >= 'H' && c <= 'R') return 'Secure with Production Key / No Functional Safety';
+  if (c >= 'S' && c <= 'Z') return 'Secure with Production Key / Functional Safety';
+  return code;
+}
+
+function parseOPN(raw) {
+  let opn = raw.trim().split('.')[0];
+  let evolution = '';
+  if (opn[0] === 'X' || opn[0] === 'P') { evolution = opn[0]; opn = opn.slice(1); }
+
+  let base = null, info = null;
+  for (const len of [7, 6]) {
+    const candidate = opn.slice(0, len);
+    if (BASE_PARTS[candidate]) { base = candidate; info = BASE_PARTS[candidate]; break; }
+  }
+  if (!base) return { error: `Unknown base part in "${raw}". Supported: ${Object.keys(BASE_PARTS).join(', ')}` };
+
+  const rest = opn.slice(base.length);
+  const pkgOptions = info.line === 'AM62L' ? ['ANB'] :
+                     info.line === 'AM62A' ? ['AMB','ANF'] :
+                     info.line === 'AM62P' ? ['AMH'] : ['ALW','AMC'];
+
+  let pkg = null, pkgPos = -1;
+  for (const p of pkgOptions) {
+    const idx = rest.indexOf(p);
+    if (idx !== -1) { pkg = p; pkgPos = idx; break; }
+  }
+  if (!pkg) return { error: `Cannot find package designator in "${raw}"` };
+
+  const fields = rest.slice(0, pkgPos);
+  const suffix = rest.slice(pkgPos + 3);
+  const expected = info.line === 'AM62x' ? 6 : 5;
+  if (fields.length !== expected)
+    return { error: `Expected ${expected} field characters before package, got ${fields.length} ("${fields}") in "${raw}"` };
+
+  const r = fields[0], speed = fields[1], feat = fields[2];
+  let funcSafety = null, security = null, securityFS = null, temp;
+  if (info.line === 'AM62x') {
+    funcSafety = fields[3]; security = fields[4]; temp = fields[5];
+  } else {
+    securityFS = fields[3]; temp = fields[4];
+  }
+
+  return {
+    raw, evolution, base, info,
+    revision: r, speed, feat, funcSafety, security, securityFS, temp,
+    pkg, tapeReel: suffix.includes('R'), q1: suffix.includes('Q1'),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 3. HTML renderers
+// ---------------------------------------------------------------------------
+
+function e(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function badge(v) {
+  const lv = String(v).toLowerCase().trim();
+  if (lv === 'yes') return '<span class="badge badge-yes">Yes</span>';
+  if (lv === 'no')  return '<span class="badge badge-no">No</span>';
+  return e(v);
+}
+
+function renderParsed(parsed, row) {
+  const {info, raw, evolution, base, revision, speed, feat, funcSafety, security, securityFS, temp, pkg, tapeReel, q1} = parsed;
+  const dl = info.line;
+  const speedLabel = (SPEED_LABELS[dl] || {})[speed] || speed;
+  const featLabel  = (FEAT_LABELS[dl]  || {})[feat]  || feat;
+  const tempLabel  = (dl === 'AM62x' ? TEMP_LABELS.AM62x : TEMP_LABELS.other)[temp] || temp;
+  const family = (row && row['Family']) || info.family;
+  const desc   = (row && row['Description']) || info.desc;
+
+  let rows = `
+    <tr><td>Base Part</td><td><span class="tag">${e(base)}</span></td></tr>
+    <tr><td>Family</td><td>${e(family)} &mdash; ${e(desc)}</td></tr>
+    <tr><td>A53 Core Count</td><td>${e(info.cores)} (${e(CORE_LABEL[info.cores] || '')})</td></tr>
+    <tr><td>Evolution Stage</td><td>${e(EVOLUTION[evolution] || evolution)}</td></tr>
+    <tr><td>Revision</td><td>${e(REVISION[revision] || revision)}</td></tr>
+    <tr><td>Speed Grade</td><td>${e(speedLabel)}</td></tr>
+    <tr><td>Features</td><td>${e(featLabel)}</td></tr>`;
+  if (dl === 'AM62x') {
+    const fsLabel = funcSafety === 'G' ? 'Non-Functional Safety' : funcSafety === 'F' ? 'Functional Safety (ISO 26262)' : funcSafety;
+    const secLabel = security === 'G' ? 'Non-Secure' : `Secure (${security})`;
+    rows += `<tr><td>Functional Safety</td><td>${e(fsLabel)}</td></tr>
+             <tr><td>Security</td><td>${e(secLabel)}</td></tr>`;
+  } else {
+    rows += `<tr><td>Security / Safety</td><td>${e(decodeSecurityFS(securityFS))}</td></tr>`;
+  }
+  rows += `
+    <tr><td>Temperature</td><td>${e(tempLabel)}</td></tr>
+    <tr><td>Package</td><td>${e(pkg)} &mdash; ${e(PACKAGES[pkg] || '')}</td></tr>
+    <tr><td>Tape &amp; Reel</td><td>${badge(tapeReel ? 'Yes' : 'No')}</td></tr>
+    <tr><td>AEC-Q100 (Q1)</td><td>${badge(q1 ? 'Yes' : 'No')}</td></tr>`;
+  return `<div class="section"><h2>Parsed Fields</h2><table>${rows}</table></div>`;
+}
+
+const FEATURE_COLS = [
+  'A53 Cores','GPU','PRUSS','MCU Core','Security Controller','Crypto Accelerators',
+  'C7x AI Accel','VPAC','VENC/VDEC','MJPEG','VPU','CSI-RX','ADC','Display',
+  'CAN','I2C','UART','SPI','McASP','eMMC','SD/SDIO','USB 2.0','Ethernet (CPSW3G)',
+  'GPIO','ePWM','eCAP','eQEP','Timers','GTC','OCSRAM Main','OCSRAM MCU',
+  'DDR Support','GPMC','OSPI/QSPI','RTC',
+];
+
+function renderFeatures(base, row) {
+  if (!row) return `<div class="section"><h2>Device Features (${e(base)})</h2><p style="color:#888">No data in orderable table.</p></div>`;
+  let trs = '';
+  FEATURE_COLS.forEach(col => {
+    const val = (row[col] || '').trim();
+    if (!val) return;
+    const cell = (val.toLowerCase() === 'yes' || val.toLowerCase() === 'no') ? badge(val) : e(val);
+    trs += `<tr><td>${e(col)}</td><td>${cell}</td></tr>`;
+  });
+  return `<div class="section"><h2>Device Features (${e(base)})</h2><table>${trs}</table></div>`;
+}
+
+const SPEED_COLS = [
+  ['A53SS @ 0.75V (MHz)','A53SS @ 0.85V (MHz)','A53SS (Cortex-A53)','MHz'],
+  ['C7x @ 0.75V (MHz)','C7x @ 0.85V (MHz)','C7x AI Accel','MHz'],
+  ['GPU @ 0.75V (MHz)','GPU @ 0.85V (MHz)','GPU','MHz'],
+  ['GPU (MHz)',null,'GPU','MHz'],
+  ['PRU (MHz)',null,'PRU','MHz'],
+  ['Main Infra/CBA (MHz)',null,'Main Infra/CBA','MHz'],
+  ['MCUSS/M4F (MHz)',null,'MCUSS/M4F','MHz'],
+  ['Device/Power Mgr (MHz)',null,'Device/Power Mgr','MHz'],
+  ['SMS Subsystem (MHz)',null,'SMS Subsystem','MHz'],
+  ['OCSRAM (MHz)',null,'OCSRAM','MHz'],
+  ['MAIN_SYSCLK0 (MHz)',null,'MAIN_SYSCLK0','MHz'],
+  ['PER_SYSCLK0 (MHz)',null,'PER_SYSCLK0','MHz'],
+  ['WKUP_SYSCLK0 (MHz)',null,'WKUP_SYSCLK0','MHz'],
+  ['MAIN_SYSCLK (MHz)',null,'MAIN_SYSCLK','MHz'],
+  ['MCU R5F (MHz)',null,'MCU R5F','MHz'],
+  ['Device Mgr R5F (MHz)',null,'Device Mgr R5F','MHz'],
+  ['HSM (MHz)',null,'HSM','MHz'],
+  ['VPAC (MHz)',null,'VPAC','MHz'],
+  ['VENC/VDEC (MHz)',null,'VENC/VDEC','MHz'],
+  ['MJPEG (MHz)',null,'MJPEG','MHz'],
+  ['VPU (MHz)',null,'VPU','MHz'],
+  ['DDR4 (MT/s)',null,'DDR4','MT/s'],
+  ['LPDDR4 (MT/s)',null,'LPDDR4','MT/s'],
+];
+
+function renderSpeedGrade(parsed, row) {
+  const sg = parsed.speed;
+  if (!row) return `<div class="section"><h2>Speed Grade ${e(sg)}</h2><p style="color:#888">No data.</p></div>`;
+
+  const seen = new Set();
+  const results = [];
+  SPEED_COLS.forEach(([c75, c85, label, unit]) => {
+    if (seen.has(label)) return;
+    const v75 = (row[c75] || '').trim();
+    if (!v75) return;
+    seen.add(label);
+    const v85 = c85 ? ((row[c85] || '').trim() || v75) : null;
+    results.push({label, v75, v85, unit});
+  });
+
+  if (!results.length) return `<div class="section"><h2>Speed Grade ${e(sg)}</h2><p style="color:#888">No data.</p></div>`;
+
+  const isSingle = parsed.info.line === 'AM62L';
+  let table;
+  if (isSingle) {
+    let trs = results.map(({label, v75, unit}) =>
+      `<tr><td>${e(label)}</td><td>${e(v75)} ${unit}</td></tr>`).join('');
+    table = `<table class="speed-table"><tr><th>Subsystem</th><th>Max Freq</th></tr>${trs}</table>`;
+  } else {
+    let trs = results.map(({label, v75, v85, unit}) => {
+      const diff = v85 && v85 !== v75;
+      const cls = diff ? ' class="diff"' : '';
+      return `<tr><td>${e(label)}</td><td${cls}>${e(v75)} ${unit}</td><td${cls}>${e(v85||v75)} ${unit}</td></tr>`;
+    }).join('');
+    table = `<table class="speed-table"><tr><th>Subsystem</th><th>@ 0.75 V</th><th>@ 0.85 V</th></tr>${trs}</table>`;
+  }
+  return `<div class="section"><h2>Speed Grade ${e(sg)}</h2>${table}</div>`;
+}
+
+const ORDERABLE_COLS = [
+  'Status','Material Type','Package | Pins','Package Qty | Carrier',
+  'RoHS','Lead Finish / Ball Material','MSL Rating / Peak Reflow','Op Temp (C)','Part Marking',
+];
+
+function renderOrderable(opn, row) {
+  if (!row) return `<div class="section"><h2>Orderable Info</h2><p style="color:#888">OPN not found in orderable table.</p></div>`;
+  let trs = ORDERABLE_COLS.map(col => {
+    const v = (row[col] || '').trim();
+    return v ? `<tr><td>${e(col)}</td><td>${e(v)}</td></tr>` : '';
+  }).join('');
+  return `<div class="section"><h2>Orderable Info</h2><table>${trs}</table></div>`;
+}
+
+// ---------------------------------------------------------------------------
+// 4. Search handler and page rendering
+// ---------------------------------------------------------------------------
+
+const EXAMPLES = [
+  'AM6254ATCGHIALWR','AM62L32BOGHAANBR',
+  'AM62A74AVMHIANFR','AM62P54CVMHIAMHR',
+  'AM62A12AQMSIANFRQ1','AM62P34CSMSIAMHRQ1',
+];
+
+function showWelcome() {
+  const links = EXAMPLES.map(ex =>
+    `<button class="example-btn" onclick="fillAndSearch('${ex}')">${ex}</button>`).join('');
+  document.getElementById('results').innerHTML = `
+    <div class="welcome">
+      <h3>Enter an Orderable Part Number above</h3>
+      <p>Decodes every field of the OPN and shows features, speed grades,<br>
+         and orderable info from the TI datasheet.</p>
+      <div class="examples">${links}</div>
+    </div>`;
+}
+
+function fillAndSearch(opn) {
+  document.getElementById('opn-input').value = opn;
+  doSearch();
+}
+
+function doSearch() {
+  const raw = document.getElementById('opn-input').value.trim();
+  if (!raw) return;
+
+  const parsed = parseOPN(raw);
+  if (parsed.error) {
+    document.getElementById('results').innerHTML =
+      `<div class="error-box"><strong>Cannot parse &ldquo;${e(raw)}&rdquo;</strong><br>${e(parsed.error)}</div>`;
+    return;
+  }
+
+  const cleanKey = raw.toUpperCase().split('.')[0];
+  const row = BY_OPN[cleanKey] || BY_BASE[parsed.base] || null;
+
+  document.getElementById('results').innerHTML = `
+    <div style="background:#f0f2f5;padding:12px 16px;border-radius:6px;margin-bottom:24px;font-family:monospace;font-size:15px;font-weight:600">
+      ${e(raw)}
+    </div>
+    ${renderParsed(parsed, row)}
+    ${renderFeatures(parsed.base, row)}
+    ${renderSpeedGrade(parsed, row)}
+    ${renderOrderable(raw, row)}`;
+}
+
+// Allow Enter key in search box
+document.getElementById('opn-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// ---------------------------------------------------------------------------
+// 5. Compare mode
+// ---------------------------------------------------------------------------
+
+function setMode(m) {
+  document.getElementById('search-mode').style.display  = m === 'search'  ? '' : 'none';
+  document.getElementById('compare-mode').style.display = m === 'compare' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) =>
+    b.classList.toggle('active', (i === 0) === (m === 'search')));
+  if (m === 'compare' && document.querySelectorAll('.compare-row').length === 0) {
+    addInput(); addInput();
+  }
+}
+
+function syncAddBtn() {
+  document.getElementById('add-btn').disabled =
+    document.querySelectorAll('.compare-row').length >= 5;
+}
+
+function addInput() {
+  if (document.querySelectorAll('.compare-row').length >= 5) return;
+  const div = document.createElement('div');
+  div.className = 'compare-row';
+  div.innerHTML =
+    '<input type="text" placeholder="Enter OPN e.g. AM6254ATCGHAALW" autocomplete="off" spellcheck="false">' +
+    '<button class="remove-btn" onclick="removeInput(this)" title="Remove">&#xd7;</button>';
+  div.querySelector('input').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') doCompare();
+  });
+  document.getElementById('compare-inputs').appendChild(div);
+  syncAddBtn();
+}
+
+function removeInput(btn) {
+  if (document.querySelectorAll('.compare-row').length <= 2) return;
+  btn.parentElement.remove();
+  syncAddBtn();
+}
+
+function doCompare() {
+  const opns = [...document.querySelectorAll('.compare-row input')]
+    .map(i => i.value.trim()).filter(Boolean);
+  const out = document.getElementById('compare-results');
+  if (opns.length < 2) {
+    out.innerHTML = '<div class="error-box">Enter at least 2 OPNs to compare.</div>';
+    return;
+  }
+  const items = opns.map(raw => {
+    const parsed = parseOPN(raw);
+    if (parsed.error) return { raw, error: parsed.error, parsed: null, row: null };
+    const key = raw.toUpperCase().split('.')[0];
+    const row = BY_OPN[key] || BY_BASE[parsed.base] || null;
+    return { raw, error: null, parsed, row };
+  });
+  const diffOnly = document.getElementById('diff-only').checked;
+  out.innerHTML =
+    renderCmpParsed(items, diffOnly) +
+    renderCmpFeatures(items, diffOnly) +
+    renderCmpSpeedGrade(items, diffOnly) +
+    renderCmpOrderable(items, diffOnly);
+}
+
+// Core comparison table builder.
+// labelledRows: [{label, values: string[]}] — one value per item, in order.
+function buildCmpSection(title, items, labelledRows, diffOnly) {
+  const hdrs = items.map(item =>
+    item.error
+      ? `<th style="color:#c41230">Parse error<br><small style="font-weight:400">${e(item.raw)}</small></th>`
+      : `<th>${e(item.raw)}<br><small style="font-weight:400;color:#777">${e(item.parsed.info.line)}</small></th>`
+  ).join('');
+
+  const trs = [];
+  for (const {label, values} of labelledRows) {
+    const allSame = values.every(v => v === values[0]);
+    if (diffOnly && allSame) continue;
+    const rowCls = allSame ? ' class="cmp-same"' : '';
+    const tds = values.map((v, i) => {
+      const isDiff = !allSame && v !== values[0];
+      const tdCls = allSame ? '' : (isDiff ? ' class="cmp-diff"' : '');
+      const rendered = v === '—'
+        ? '<span style="color:#ccc">&#8212;</span>'
+        : (v.toLowerCase() === 'yes' || v.toLowerCase() === 'no') ? badge(v) : e(v);
+      return `<td${tdCls}>${rendered}</td>`;
+    }).join('');
+    trs.push(`<tr${rowCls}><td class="cmp-label">${e(label)}</td>${tds}</tr>`);
+  }
+
+  if (!trs.length) {
+    const msg = diffOnly ? 'All values are identical.' : 'No data.';
+    return `<div class="section"><h2>${e(title)}</h2><p style="color:#888">${msg}</p></div>`;
+  }
+
+  const colW = Math.floor(100 / (items.length + 1));
+  return `<div class="section"><h2>${e(title)}</h2>
+    <div style="overflow-x:auto">
+    <table class="cmp-table" style="table-layout:auto">
+      <tr><th style="width:220px"></th>${hdrs}</tr>
+      ${trs.join('\n      ')}
+    </table></div></div>`;
+}
+
+function renderCmpParsed(items, diffOnly) {
+  const ALL_LABELS = [
+    'Base Part','Family','A53 Core Count','Evolution Stage','Revision',
+    'Speed Grade','Features','Functional Safety','Security','Security / Safety',
+    'Temperature','Package','Tape & Reel','AEC-Q100 (Q1)',
+  ];
+
+  const maps = items.map(item => {
+    if (item.error) return null;
+    const {parsed, row} = item;
+    const {info, evolution, base, revision, speed, feat,
+           funcSafety, security, securityFS, temp, pkg, tapeReel, q1} = parsed;
+    const dl = info.line;
+    const family = (row && row['Family']) || info.family;
+    const desc   = (row && row['Description']) || info.desc;
+    const m = {};
+    m['Base Part']       = base;
+    m['Family']          = `${family} — ${desc}`;
+    m['A53 Core Count']  = `${info.cores} (${CORE_LABEL[info.cores] || ''})`;
+    m['Evolution Stage'] = EVOLUTION[evolution] || evolution;
+    m['Revision']        = REVISION[revision] || revision;
+    m['Speed Grade']     = (SPEED_LABELS[dl] || {})[speed] || speed;
+    m['Features']        = (FEAT_LABELS[dl]  || {})[feat]  || feat;
+    if (dl === 'AM62x') {
+      m['Functional Safety'] = funcSafety === 'G' ? 'Non-Functional Safety'
+                             : funcSafety === 'F' ? 'Functional Safety (ISO 26262)' : funcSafety;
+      m['Security']          = security === 'G' ? 'Non-Secure' : `Secure (${security})`;
+    } else {
+      m['Security / Safety'] = decodeSecurityFS(securityFS);
+    }
+    m['Temperature']    = (dl === 'AM62x' ? TEMP_LABELS.AM62x : TEMP_LABELS.other)[temp] || temp;
+    m['Package']        = `${pkg} — ${PACKAGES[pkg] || ''}`;
+    m['Tape & Reel']    = tapeReel ? 'Yes' : 'No';
+    m['AEC-Q100 (Q1)']  = q1 ? 'Yes' : 'No';
+    return m;
+  });
+
+  const usedLabels = ALL_LABELS.filter(lbl => maps.some(m => m && m[lbl] !== undefined));
+  const labelledRows = usedLabels.map(lbl => ({
+    label: lbl,
+    values: maps.map((m, i) =>
+      items[i].error ? 'Error' : (m && m[lbl] !== undefined ? m[lbl] : '—')
+    ),
+  }));
+
+  return buildCmpSection('Parsed Fields', items, labelledRows, diffOnly);
+}
+
+function renderCmpFeatures(items, diffOnly) {
+  const labelledRows = FEATURE_COLS
+    .map(col => ({
+      label: col,
+      values: items.map(item =>
+        (item.error || !item.row) ? '—' : ((item.row[col] || '').trim() || '—')
+      ),
+    }))
+    .filter(r => r.values.some(v => v !== '—'));
+  return buildCmpSection('Device Features', items, labelledRows, diffOnly);
+}
+
+function renderCmpSpeedGrade(items, diffOnly) {
+  const seen = new Set();
+  const labelledRows = [];
+  SPEED_COLS.forEach(([c75, c85, label]) => {
+    if (seen.has(label)) return;
+    const values = items.map(item => {
+      if (item.error || !item.row) return '—';
+      const v75 = (item.row[c75] || '').trim();
+      if (!v75) return '—';
+      const v85 = c85 ? ((item.row[c85] || '').trim() || v75) : null;
+      return (v85 && v85 !== v75) ? `${v75} / ${v85} MHz` : `${v75} MHz`;
+    });
+    if (values.every(v => v === '—')) return;
+    seen.add(label);
+    labelledRows.push({ label, values });
+  });
+  return buildCmpSection('Speed Grade', items, labelledRows, diffOnly);
+}
+
+function renderCmpOrderable(items, diffOnly) {
+  const labelledRows = ORDERABLE_COLS
+    .map(col => ({
+      label: col,
+      values: items.map(item =>
+        (item.error || !item.row) ? '—' : ((item.row[col] || '').trim() || '—')
+      ),
+    }))
+    .filter(r => r.values.some(v => v !== '—'));
+  return buildCmpSection('Orderable Info', items, labelledRows, diffOnly);
+}
+
+// Load data on startup
+document.getElementById('search-btn').disabled = true;
+loadData();
+</script>
+</body>
+</html>
