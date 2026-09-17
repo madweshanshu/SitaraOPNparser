@@ -7,6 +7,32 @@
 - **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse
 - **Confluence**: https://confluence.itg.ti.com/display/LinuxApps/Sitara+OPN+Parser
 
+## Branch Strategy
+
+- **main** (GitHub) / **master** (Bitbucket) - stable, deployed to GitHub Pages
+- **dev** - active development; merge to main/master when features are ready
+
+## Planned Features (dev branch)
+
+None outstanding — see completed features below.
+
+## 2026-09-17
+
+### Device comparison feature (web app)
+
+- Added **Compare** tab to `index.html` alongside the existing Search tab
+- Supports up to 5 OPNs side-by-side; start with 2 slots, add more with **+ Add device**
+- Comparison table covers all four sections: Parsed Fields, Device Features, Speed Grade, Orderable Info
+- Identical rows muted/faded; differing cells highlighted yellow
+- **Show differences only** checkbox filters out identical rows
+- Speed Grade comparison shows all subsystems any device has; blank cell where a device has no data for that subsystem (handles cross-family comparisons cleanly)
+- Fixed MCU core display: AM62x shows Cortex-M4F, AM62A/AM62P show Cortex-R5F
+
+### Dev preview deployment
+- Added `.github/workflows/preview-dev.yml` — on every push to `dev`, auto-deploys to `https://madweshanshu.github.io/SitaraOPNparser/dev/`
+
+---
+
 ## 2026-09-10
 
 - Log file created. Ready to document progress.

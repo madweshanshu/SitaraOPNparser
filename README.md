@@ -5,7 +5,16 @@
 **Bitbucket**: https://bitbucket.itg.ti.com/users/a0507831/repos/sitara-opn-parser/browse  
 **GitHub**: https://github.com/madweshanshu/SitaraOPNparser
 
-Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display the device's capabilities, speed grades, and orderable information sourced directly from TI datasheets.
+## Branches
+
+| Branch | Purpose |
+|---|---|
+| `main` (GitHub) / `master` (Bitbucket) | Stable — deploys to GitHub Pages live app |
+| `dev` | Active development — auto-deploys to `/dev/` preview on every push |
+
+**Preview URL**: https://madweshanshu.github.io/SitaraOPNparser/dev/
+
+Decode any AM62x / AM62L / AM62A / AM62P orderable part number (OPN) and display the device's capabilities, speed grades, and orderable information sourced directly from TI datasheets. The web app also supports side-by-side **device comparison** of up to 5 OPNs.
 
 ## Supported Devices
 
@@ -33,6 +42,23 @@ pip install pdfplumber   # only needed to re-extract data from PDFs
 ```
 
 The three parser scripts (`parse_opn.py`, `parse_opn_html.py`, `parse_opn_web.py`) have **no external dependencies** beyond the standard library — they read only from the `master_*.csv` files included in the repo.
+
+## Web App Features
+
+### Search
+Enter any OPN into the search bar. The app decodes every field and shows:
+- **Parsed Fields** — evolution stage, revision, speed grade, features, security, temperature, package
+- **Device Features** — full feature table for this device variant
+- **Speed Grade** — max frequencies per subsystem at 0.75 V and 0.85 V
+- **Orderable Info** — status, MSL rating, part marking from the datasheet
+
+### Compare
+Click the **Compare** tab to load up to 5 OPNs side-by-side:
+- Start with 2 input slots; use **+ Add device** to add up to 5
+- Click **Compare** to generate a four-section comparison table
+- Identical rows are muted; differing cells are highlighted in yellow
+- Toggle **Show differences only** to hide identical rows
+- Works across device families — subsystems unique to one family show blank for others
 
 ## Usage
 
